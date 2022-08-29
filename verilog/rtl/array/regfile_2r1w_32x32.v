@@ -173,7 +173,7 @@ generate case (RA_SELECT)
    end
    end
 
-   `RA_DFFRAM: begin        // DFFRAM 32x32
+   `RA_DFFRAM: begin        // DFFRAM 32x32 //wtf should this be instantiated a level up and skip adr munging,e tc.?
 
       DFFRF_2R1W #() mem (
          `ifdef USE_POWER_PINS
