@@ -1,5 +1,16 @@
 # Caravel user project includes
--v $(USER_PROJECT_VERILOG)/rtl/user_project_wrapper.v	     
--v $(USER_PROJECT_VERILOG)/rtl/user_proj_example.v
+-v $(USER_PROJECT_VERILOG)/rtl/user_project_wrapper.v
+-v $(USER_PROJECT_VERILOG)/rtl/site/toysram_site.v
+-v $(USER_PROJECT_VERILOG)/rtl/site/cfg.v
+-v $(USER_PROJECT_VERILOG)/rtl/site/control.v
+-v $(USER_PROJECT_VERILOG)/rtl/site/defines.v
+-v $(USER_PROJECT_VERILOG)/rtl/site/io_intf.v
+-v $(USER_PROJECT_VERILOG)/rtl/site/misc.v
+-v $(USER_PROJECT_VERILOG)/rtl/site/wb_slave.v
+-v $(USER_PROJECT_VERILOG)/rtl/array/predecode_sdr_32.v
+-v $(USER_PROJECT_VERILOG)/rtl/array/ra_bist_sdr_32x32.v
+-v $(USER_PROJECT_VERILOG)/rtl/array/ra_cfg_sdr.v
+-v $(USER_PROJECT_VERILOG)/rtl/array/ra_delay.v
+-v $(USER_PROJECT_VERILOG)/rtl/array/ra_lcb_sdr.v
+-v $(USER_PROJECT_VERILOG)/rtl/array/regfile_2r1w_32x32.v
 
- 
