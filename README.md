@@ -5,8 +5,10 @@
 | :exclamation: Important Note            |
 |-----------------------------------------|
 
-## Please fill in your project documentation in this README.md file 
 
-Refer to [README](docs/source/quickstart.rst) for a quick start of how to use caravel_user_project
+## Project description and development: https://github.com/openpowerfoundation/toy-sram
 
-Refer to [README](docs/source/index.rst) for this sample project documentation. 
+This project is a test site for a custom 10T array cell design.  It is built as a 32x32 2R1W regfile and includes Wishbone and scan I/O access.
+
+
+Refer to [README](docs/source/index.rst) for this sample project documentation.
