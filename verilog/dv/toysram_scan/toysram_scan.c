@@ -73,15 +73,15 @@ void main()
    io_ra0_w0_enb = dut.io_in[8];
    */
 
-	reg_mprj_io_0 =  GPIO_MODE_USER_STD_INPUT_PULLDOWN;   // test_enable
-	reg_mprj_io_1 =  GPIO_MODE_USER_STD_INPUT_PULLDOWN;   // scan_clk
-	reg_mprj_io_2 =  GPIO_MODE_USER_STD_INPUT_PULLDOWN;   // scan_di
-	reg_mprj_io_3 =  GPIO_MODE_USER_STD_OUTPUT;  // scan_do
-	reg_mprj_io_4 =  GPIO_MODE_USER_STD_INPUT_PULLDOWN;   // io_ra0_clk
-	reg_mprj_io_5 =  GPIO_MODE_USER_STD_INPUT_PULLDOWN;   // io_ra0_rst
-	reg_mprj_io_6 =  GPIO_MODE_USER_STD_INPUT_PULLDOWN;   // io_ra0_r0_enb
-	reg_mprj_io_7 =  GPIO_MODE_USER_STD_INPUT_PULLDOWN;   // io_ra0_r1_enb
-	reg_mprj_io_8 =  GPIO_MODE_USER_STD_INPUT_PULLDOWN;   // io_ra0_w0_enb
+	reg_mprj_io_0 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // test_enable
+	reg_mprj_io_1 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // scan_clk
+	reg_mprj_io_2 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // scan_di
+	reg_mprj_io_3 = GPIO_MODE_USER_STD_OUTPUT;            // scan_do
+	reg_mprj_io_4 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_clk
+	reg_mprj_io_5 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_rst
+	reg_mprj_io_6 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_r0_enb
+	reg_mprj_io_7 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_r1_enb
+	reg_mprj_io_8 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_w0_enb
 
    // *******************************************************************************
 	reg_mprj_xfer = 1;

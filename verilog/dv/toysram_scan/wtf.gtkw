@@ -1,23 +1,23 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Tue Sep  6 20:41:29 2022
+[*] Tue Sep  6 21:24:58 2022
 [*]
 [dumpfile] "/data/projects/toy-sram-mpw7/verilog/dv/toysram_scan/RTL-toysram_scan.vcd"
-[dumpfile_mtime] "Tue Sep  6 20:28:08 2022"
-[dumpfile_size] 468308
+[dumpfile_mtime] "Tue Sep  6 21:03:04 2022"
+[dumpfile_size] 467930
 [savefile] "/data/projects/toy-sram-mpw7/verilog/dv/toysram_scan/wtf.gtkw"
-[timestart] 1491700
+[timestart] 143635500
 [size] 1937 1054
-[pos] 372 112
-*-17.000000 2000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] 441 179
+*-16.382318 143862500 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] toysram_scan_tb.
 [treeopen] toysram_scan_tb.uut.
 [treeopen] toysram_scan_tb.uut.mprj.
 [treeopen] toysram_scan_tb.uut.mprj.mprj.
 [treeopen] toysram_scan_tb.uut.soc.
-[treeopen] toysram_scan_tb.uut.user_id_value.
-[sst_width] 206
-[signals_width] 252
+[treeopen] toysram_scan_tb.uut.soc.core.
+[sst_width] 288
+[signals_width] 318
 [sst_expanded] 1
 [sst_vpaned_height] 307
 @28
@@ -26,10 +26,34 @@ toysram_scan_tb.RSTB
 @22
 toysram_scan_tb.mprj_io[37:0]
 @200
+-VRV
+@23
+toysram_scan_tb.uut.soc.core.VexRiscv.IBusCachedPlugin_fetchPc_pcReg[31:0]
+@28
+toysram_scan_tb.uut.soc.core.VexRiscv.dBusWishbone_CYC
+toysram_scan_tb.uut.soc.core.VexRiscv.dBusWishbone_STB
+@2
+toysram_scan_tb.uut.soc.core.VexRiscv.dBusWishbone_ADR[29:0]
+@28
+toysram_scan_tb.uut.soc.core.VexRiscv.iBusWishbone_CYC
+toysram_scan_tb.uut.soc.core.VexRiscv.iBusWishbone_STB
+@2
+toysram_scan_tb.uut.soc.core.VexRiscv.iBusWishbone_ADR[29:0]
+@200
 -Site
 @28
 toysram_scan_tb.uut.mprj.mprj.clk
 toysram_scan_tb.uut.mprj.mprj.rst
+toysram_scan_tb.uut.mprj.wbs_cyc_i
+toysram_scan_tb.uut.mprj.wbs_stb_i
+@22
+toysram_scan_tb.uut.mprj.wbs_adr_i[31:0]
+toysram_scan_tb.uut.mprj.wbs_dat_o[31:0]
+@28
+toysram_scan_tb.uut.mprj.wbs_we_i
+@22
+toysram_scan_tb.uut.mprj.wbs_sel_i[3:0]
+toysram_scan_tb.uut.mprj.wbs_dat_i[31:0]
 @200
 -CTRL
 @28
@@ -39,7 +63,7 @@ toysram_scan_tb.uut.mprj.mprj.ctl.rst
 toysram_scan_tb.uut.mprj.mprj.ctl.seq_q[4:0]
 @28
 toysram_scan_tb.uut.mprj.mprj.ctl.rd_wait_q[2:0]
-@23
+@22
 toysram_scan_tb.uut.mprj.mprj.ctl.cfg0_q[31:0]
 @28
 toysram_scan_tb.uut.mprj.mprj.ctl.test_enable
@@ -54,5 +78,18 @@ toysram_scan_tb.uut.mprj.mprj.ctl.io_ra0_rst
 toysram_scan_tb.uut.mprj.mprj.ctl.ra0_r0_enb
 toysram_scan_tb.uut.mprj.mprj.ctl.ra0_r1_enb
 toysram_scan_tb.uut.mprj.mprj.ctl.ra0_w0_enb
+@200
+-WB
+@28
+toysram_scan_tb.uut.mprj.mprj.wb.wbs_stb_i
+toysram_scan_tb.uut.mprj.mprj.wb.wbs_cyc_i
+toysram_scan_tb.uut.mprj.mprj.wb.wbs_we_i
+@22
+toysram_scan_tb.uut.mprj.mprj.wb.wbs_sel_i[3:0]
+toysram_scan_tb.uut.mprj.mprj.wb.wbs_adr_i[31:0]
+toysram_scan_tb.uut.mprj.mprj.wb.wbs_dat_i[31:0]
+toysram_scan_tb.uut.mprj.mprj.wb.wbs_dat_o[31:0]
+@28
+toysram_scan_tb.uut.mprj.mprj.wb.wbs_ack_o
 [pattern_trace] 1
 [pattern_trace] 0

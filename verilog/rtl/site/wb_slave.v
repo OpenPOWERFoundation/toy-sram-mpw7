@@ -24,12 +24,14 @@
 // Wishbone slave macro
 // Bridges internal read/write commands to/from Wishbone.
 
-module wb_slave (
+module wb_slave #(
+   parameter base_addr = 'h30000000,
+   parameter base_mask = 'hF0000000
+) (
 `ifdef USE_POWER_PINS
-   inout vccd1,
-   inout vssd1,
+   inout                vccd1,
+   inout                vssd1,
 `endif
-
    input                clk,
    input                rst,
    input                wbs_stb_i,
@@ -92,9 +94,9 @@ module wb_slave (
    // WB
 
    assign stall = 'b0;
-   assign base_match = 'b1;
+   assign base_match = (cmd_adr_d & base_mask) == base_addr;
 
-   assign cmd_val_d = base_match & wbs_stb_i & ~stall;
+   assign cmd_val_d = base_match & wbc_cyc_i & wbs_stb_i & ~stall;
    assign cmd_adr_d = wbs_adr_i[27:0];
    assign cmd_we_d = wbs_we_i;
    assign cmd_sel_d = wbs_sel_i;
