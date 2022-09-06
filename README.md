@@ -14,7 +14,10 @@ This project is a test site for a custom 10T array cell design.  It is built as 
 ### Sim
 
 * should build and sim; z on outs an x on ins
-* looks like VexRisc is stuck waiting for ack for ifetch=100002C0
+* looks like VexRisc is stuck waiting for ack for ifetch=100002C0; jump to main
+```
+100002c0 <main>:
+```
 
 ```
 make verify-toysram_scan-rtl

@@ -96,7 +96,7 @@ module wb_slave #(
    assign stall = 'b0;
    assign base_match = (cmd_adr_d & base_mask) == base_addr;
 
-   assign cmd_val_d = base_match & wbc_cyc_i & wbs_stb_i & ~stall;
+   assign cmd_val_d = base_match & wbs_cyc_i & wbs_stb_i & ~stall;
    assign cmd_adr_d = wbs_adr_i[27:0];
    assign cmd_we_d = wbs_we_i;
    assign cmd_sel_d = wbs_sel_i;

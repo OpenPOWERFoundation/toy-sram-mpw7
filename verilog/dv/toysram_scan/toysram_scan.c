@@ -49,7 +49,7 @@ void main()
 	// reg_spimaster_control = 0x0801;
 
 	// reg_spimaster_control = 0xa002;	// Enable, prescaler = 2,
-                                        // connect to housekeeping SPI
+                                       // connect to housekeeping SPI
 
 	// Connect the housekeeping SPI to the SPI master
 	// so that the CSB line is not left floating.  This allows

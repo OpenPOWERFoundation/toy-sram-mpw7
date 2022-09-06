@@ -31,7 +31,7 @@ hex:  ${BLOCKS:=.hex}
 #.SUFFIXES:
 
 ##############################################################################
-# Comiple firmware
+# Compile firmware
 ##############################################################################
 %.elf: %.c $(LINKER_SCRIPT) $(SOURCE_FILES)
 	${GCC_PATH}/${GCC_PREFIX}-gcc -g \
@@ -61,7 +61,7 @@ hex:  ${BLOCKS:=.hex}
 
 %.vvp: %_tb.v %.hex
 
-# wtf - update so you can actaully specify an include dir
+# wtf - update so you can actually specify an include dir
 
 ## RTL
 ifeq ($(SIM),RTL)
