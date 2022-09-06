@@ -1,0 +1,58 @@
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Tue Sep  6 20:41:29 2022
+[*]
+[dumpfile] "/data/projects/toy-sram-mpw7/verilog/dv/toysram_scan/RTL-toysram_scan.vcd"
+[dumpfile_mtime] "Tue Sep  6 20:28:08 2022"
+[dumpfile_size] 468308
+[savefile] "/data/projects/toy-sram-mpw7/verilog/dv/toysram_scan/wtf.gtkw"
+[timestart] 1491700
+[size] 1937 1054
+[pos] 372 112
+*-17.000000 2000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] toysram_scan_tb.
+[treeopen] toysram_scan_tb.uut.
+[treeopen] toysram_scan_tb.uut.mprj.
+[treeopen] toysram_scan_tb.uut.mprj.mprj.
+[treeopen] toysram_scan_tb.uut.soc.
+[treeopen] toysram_scan_tb.uut.user_id_value.
+[sst_width] 206
+[signals_width] 252
+[sst_expanded] 1
+[sst_vpaned_height] 307
+@28
+toysram_scan_tb.clock
+toysram_scan_tb.RSTB
+@22
+toysram_scan_tb.mprj_io[37:0]
+@200
+-Site
+@28
+toysram_scan_tb.uut.mprj.mprj.clk
+toysram_scan_tb.uut.mprj.mprj.rst
+@200
+-CTRL
+@28
+toysram_scan_tb.uut.mprj.mprj.ctl.clk
+toysram_scan_tb.uut.mprj.mprj.ctl.rst
+@22
+toysram_scan_tb.uut.mprj.mprj.ctl.seq_q[4:0]
+@28
+toysram_scan_tb.uut.mprj.mprj.ctl.rd_wait_q[2:0]
+@23
+toysram_scan_tb.uut.mprj.mprj.ctl.cfg0_q[31:0]
+@28
+toysram_scan_tb.uut.mprj.mprj.ctl.test_enable
+toysram_scan_tb.uut.mprj.mprj.ctl.scan_clk
+toysram_scan_tb.uut.mprj.mprj.ctl.scan_di
+toysram_scan_tb.uut.mprj.mprj.ctl.scan_do
+@22
+toysram_scan_tb.uut.mprj.mprj.ctl.scan_reg_q[127:0]
+@28
+toysram_scan_tb.uut.mprj.mprj.ctl.io_ra0_clk
+toysram_scan_tb.uut.mprj.mprj.ctl.io_ra0_rst
+toysram_scan_tb.uut.mprj.mprj.ctl.ra0_r0_enb
+toysram_scan_tb.uut.mprj.mprj.ctl.ra0_r1_enb
+toysram_scan_tb.uut.mprj.mprj.ctl.ra0_w0_enb
+[pattern_trace] 1
+[pattern_trace] 0
