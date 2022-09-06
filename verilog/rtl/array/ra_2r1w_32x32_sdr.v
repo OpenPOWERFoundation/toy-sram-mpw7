@@ -26,15 +26,15 @@
 `include "toysram.vh"
 
 module  ra_2r1w_32x32_sdr #(
-   parameter RA_SELECT,
+   parameter RA_SELECT = `RA_SIM,
    parameter GENMODE = `GENMODE,        // 0=NoDelay, 1=Delay
    parameter LATCHRD = 1                // 1=latch read data, 0=unlatched
 )(
 
-   `ifdef USE_POWER_PINS
-      .vccd1(vccd1),	// User area 1 1.8V supply
-      .vssd1(vssd1),	// User area 1 digital ground
-   `endif
+`ifdef USE_POWER_PINS
+   input          vccd1,	// User area 1 1.8V supply
+   input          vssd1,	// User area 1 digital ground
+`endif
 
    input         clk,
    input         reset,

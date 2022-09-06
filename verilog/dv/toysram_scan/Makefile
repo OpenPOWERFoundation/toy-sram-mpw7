@@ -15,7 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
- 
+
 PWDD := $(shell pwd)
 BLOCKS := $(shell basename $(PWDD))
 
@@ -23,10 +23,12 @@ BLOCKS := $(shell basename $(PWDD))
 
 CONFIG = caravel_user_project
 
-
 include $(MCW_ROOT)/verilog/dv/make/env.makefile
 include $(MCW_ROOT)/verilog/dv/make/var.makefile
 include $(MCW_ROOT)/verilog/dv/make/cpu.makefile
-include $(MCW_ROOT)/verilog/dv/make/sim.makefile
+
+IVERILOG_OPTIONS := -I$(CARAVEL_PATH)/../../verilog/rtl/site
+#include $(MCW_ROOT)/verilog/dv/make/sim.makefile
+include ./sim.makefile
 
 

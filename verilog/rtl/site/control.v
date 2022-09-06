@@ -31,11 +31,11 @@ module control #(
    parameter CFG0_ADDR = 'h00000000,
    parameter CFG0_INIT = 'h00000001
 )(
-   `ifdef USE_POWER_PINS
-    inout vccd1,
-    inout vssd1
-`endif
 
+`ifdef USE_POWER_PINS
+    inout vccd1,
+    inout vssd1,
+`endif
    input          clk,
    input          rst,
 

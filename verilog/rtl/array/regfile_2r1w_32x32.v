@@ -24,15 +24,18 @@
 
 `timescale 1 ps / 1 ps
 
+`include "toysram.vh"
+
 module regfile_2r1w_32x32 #(
-   parameter RA_SELECT
+   parameter RA_SELECT = `RA_SIM
 ) (
 
 `ifdef USE_POWER_PINS
-   .vccd1(vccd1),	// User area 1 1.8V supply
-   .vssd1(vssd1),	// User area 1 digital ground
+   input vccd1,	// User area 1 1.8V supply
+   input vssd1,	// User area 1 digital ground
 `endif
 
+   input   clk,
    //   -- predecoded address
    //   -- four groups of one hot encoded signals
 
@@ -125,13 +128,13 @@ generate case (RA_SELECT)
    reg[0:31] mem[0:31];
 
    //wtf:icarus $dumpvars cannot dump a vpiMemory
-   generate
+   //generate
       genvar i;
       for (i = 0; i < 31; i=i+1) begin: ra
          wire [0:31] q;
          assign q = mem[i];
       end
-   endgenerate
+   //endgenerate
 
    // decode inputs, rd0
    assign rd0_enable = rd0_c_a0 | rd0_c_na0;

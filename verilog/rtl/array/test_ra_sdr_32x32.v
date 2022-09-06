@@ -28,12 +28,12 @@
 `include "toysram.vh"
 
 module  test_ra_sdr_32x32 #(
-   parameter      RA_SELECT
+   parameter      RA_SELECT = `RA_SIM
 ) (
 
 `ifdef USE_POWER_PINS
-   .vccd1(vccd1),	// User area 1 1.8V supply
-   .vssd1(vssd1),	// User area 1 digital ground
+   inout vccd1,	// User area 1 1.8V supply
+   inout vssd1,	// User area 1 digital ground
 `endif
 
    input          clk,
