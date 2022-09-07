@@ -19,32 +19,35 @@ This project is a test site for a custom 10T array cell design.  It is built as 
 ```
 100002c0 <main>:
 ```
-* appears some gpio's are used by flash??? don't see any comments anywhere.  core now running...
+
+* appears some gpio's are used by flash??? don't see any comments anywhere - bit 3?.  core now running...
+* and scan in/out somehow works!
 
 ```
 make verify-toysram_scan-rtl
+...
+[00000004] Test Enable is inactive.
+[00000080] Releasing reset.
+[00002000] ...tick...
+[00004000] ...tick...
+[00006000] ...tick...
+[00008000] ...tick...
+[00010000] ...tick...
+[00012000] ...tick...
+[00014000] ...tick...
+[00015000] Setting Test Enable.
+[00015000] Test Enable is active.
+[00015003] Writing scan reg: 0123456789abcdeffedcba9876543210
+[00015007] Scanning in...
+[00016000] ...tick...
+[00016031] Scan complete.
+[00016035] Scanning out...
+[00017059] Scan complete.
+[00017059] Read scan reg: 0123456789abcdeffedcba9876543210
+[00017100] Test Enable is inactive.
 
-iverilog -Ttyp -DFUNCTIONAL -DSIM -DUSE_POWER_PINS -DUNIT_DELAY=#1 \
-      -f/data/projects/toy-sram-mpw7/mgmt_core_wrapper/verilog/includes/includes.rtl.caravel \
-      -f/data/projects/toy-sram-mpw7/verilog/includes/includes.rtl.caravel_user_project \
-      -I/data/projects/toy-sram-mpw7/caravel/verilog/../../verilog/rtl/site \
-      -o toysram_scan.vvp toysram_scan_tb.v
-/data/projects/toy-sram-mpw7/caravel/verilog/rtl/caravel.v:258: warning: input port clock is coerced to inout.
-/data/projects/toy-sram-mpw7/verilog/rtl/site/toysram_site.v:272: warning: Port 6 (cfg_dat) of test_ra_sdr_32x32 expects 16 bits, got 32.
-/data/projects/toy-sram-mpw7/verilog/rtl/site/toysram_site.v:272:        : Pruning 16 high bits of the expression.
-vvp  toysram_scan.vvp
-Reading toysram_scan.hex
-toysram_scan.hex loaded into memory
-Memory 5 bytes = 0x6f 0x00 0x00 0x0b 0x13
-FST info: dumpfile toysram_scan.vcd opened for output.
-MPRJ-IO state = zzzzzzzzz
+[00017139] You has opulence.
 
-Monitor: Timeout, Test Mega-Project IO Ports (RTL) Failed
-
-toysram_scan_tb.v:81: $finish called at 624987500 (1ps)
-mv toysram_scan.vcd RTL-toysram_scan.vcd
-/foss/tools/riscv-gnu-toolchain-rv32i/217e7f3debe424d61374d31e33a091a630535937/bin/riscv32-unknown-linux-gnu-objdump -d -S toysram_scan.elf > toysram_scan.lst
-rm toysram_scan.elf toysram_scan.vvp
 ```
 
 Refer to [README](docs/source/index.rst) for this sample project documentation.

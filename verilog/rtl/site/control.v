@@ -171,7 +171,6 @@ module control #(
    assign test_enable = io_in[`PIN_TE];
    assign scan_clk = io_in[`PIN_SCAN_CLK];
    assign scan_di = io_in[`PIN_SCAN_IN];
-   assign io_out[`PIN_SCAN_OUT] = scan_do;
 
    assign io_ra0_clk = io_in[`PIN_RA0_CLK];
    assign io_ra0_rst = io_in[`PIN_RA0_RST];
@@ -179,8 +178,8 @@ module control #(
    assign io_ra0_r1_enb = io_in[`PIN_RA0_R1_EN];
    assign io_ra0_w0_enb = io_in[`PIN_RA0_W0_EN];
 
-   //assign io_oeb = '{`MPRJ_IO_PADS'('h0000000000000008)};
-   assign io_oeb = ~'h0000000000000008;
+   assign io_out[`PIN_SCAN_OUT] = scan_do;
+   assign io_oeb = `PINS_OEB;
 
    assign io_ra0_r0_adr = scan_reg_q[127:123];
    //assign io_ra0_r0_dat = scan_reg_q[122:91]; // loaded by io_ra0_clk
