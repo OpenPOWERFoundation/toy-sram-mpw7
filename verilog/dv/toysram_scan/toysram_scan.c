@@ -59,29 +59,27 @@ void main()
    // *******************************************************************************
 	// Configure I/Os
 
-   /* toysram site I/Os
-   # control.v
-   test_enable = dut.io_in[0];
-   scan_clk = dut.io_in[1];
-   scan_di = dut.io_in[2];
-   scan_do = dut.io_out[3]
+#define PIN_TE 8
+// Scan
+#define PIN_SCAN_CLK 9
+#define PIN_SCAN_IN 10
+#define PIN_SCAN_OUT 11
+// RA0
+#define PIN_RA0_CLK 12
+#define PIN_RA0_RST 13
+#define PIN_RA0_R0_EN 14
+#define PIN_RA0_R1_EN 15
+#define PIN_RA0_W0_EN 16
 
-   io_ra0_clk = dut.io_in[4];
-   io_ra0_rst = dut.io_in[5];
-   io_ra0_r0_enb = dut.io_in[6];
-   io_ra0_r1_enb = dut.io_in[7];
-   io_ra0_w0_enb = dut.io_in[8];
-   */
-
-	reg_mprj_io_0 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // test_enable
-	reg_mprj_io_1 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // scan_clk
-	reg_mprj_io_2 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // scan_di
-	reg_mprj_io_3 = GPIO_MODE_USER_STD_OUTPUT;            // scan_do
-	reg_mprj_io_4 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_clk
-	reg_mprj_io_5 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_rst
-	reg_mprj_io_6 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_r0_enb
-	reg_mprj_io_7 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_r1_enb
-	reg_mprj_io_8 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_w0_enb
+	reg_mprj_io_8 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;     // test_enable
+	reg_mprj_io_9 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;     // scan_clk
+	reg_mprj_io_10 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // scan_di
+	reg_mprj_io_11 = GPIO_MODE_USER_STD_OUTPUT;            // scan_do
+	reg_mprj_io_12 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_clk
+	reg_mprj_io_13 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_rst
+	reg_mprj_io_14 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_r0_enb
+	reg_mprj_io_15 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_r1_enb
+	reg_mprj_io_16 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_w0_enb
 
    // *******************************************************************************
 	reg_mprj_xfer = 1;

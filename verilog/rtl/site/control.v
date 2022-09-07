@@ -168,16 +168,16 @@ module control #(
    //
    // * not enough I/O to do full-speed reads/writes through I/O; enough for addresses, and could have data gen/chk logic for data
 
-   assign test_enable = io_in[0];
-   assign scan_clk = io_in[1];
-   assign scan_di = io_in[2];
-   assign io_out[3] = scan_do;
+   assign test_enable = io_in[`PIN_TE];
+   assign scan_clk = io_in[`PIN_SCAN_CLK];
+   assign scan_di = io_in[`PIN_SCAN_IN];
+   assign io_out[`PIN_SCAN_OUT] = scan_do;
 
-   assign io_ra0_clk = io_in[4];
-   assign io_ra0_rst = io_in[5];
-   assign io_ra0_r0_enb = io_in[6];
-   assign io_ra0_r1_enb = io_in[7];
-   assign io_ra0_w0_enb = io_in[8];
+   assign io_ra0_clk = io_in[`PIN_RA0_CLK];
+   assign io_ra0_rst = io_in[`PIN_RA0_RST];
+   assign io_ra0_r0_enb = io_in[`PIN_RA0_R0_EN];
+   assign io_ra0_r1_enb = io_in[`PIN_RA0_R1_EN];
+   assign io_ra0_w0_enb = io_in[`PIN_RA0_W0_EN];
 
    //assign io_oeb = '{`MPRJ_IO_PADS'('h0000000000000008)};
    assign io_oeb = ~'h0000000000000008;

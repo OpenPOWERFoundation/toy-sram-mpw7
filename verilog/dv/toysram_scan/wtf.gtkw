@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Tue Sep  6 21:28:57 2022
+[*] Wed Sep  7 12:10:25 2022
 [*]
 [dumpfile] "/data/projects/toy-sram-mpw7/verilog/dv/toysram_scan/RTL-toysram_scan.vcd"
-[dumpfile_mtime] "Tue Sep  6 21:03:04 2022"
+[dumpfile_mtime] "Tue Sep  6 22:03:21 2022"
 [dumpfile_size] 467930
 [savefile] "/data/projects/toy-sram-mpw7/verilog/dv/toysram_scan/wtf.gtkw"
-[timestart] 143635500
-[size] 1937 1054
-[pos] 391 170
-*-16.382318 143862500 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 332058300
+[size] 1637 1093
+[pos] 674 167
+*-15.382318 332064400 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] toysram_scan_tb.
 [treeopen] toysram_scan_tb.uut.
 [treeopen] toysram_scan_tb.uut.mprj.
@@ -19,10 +19,20 @@
 [sst_width] 288
 [signals_width] 397
 [sst_expanded] 1
-[sst_vpaned_height] 307
+[sst_vpaned_height] 321
 @28
 toysram_scan_tb.clock
 toysram_scan_tb.RSTB
+toysram_scan_tb.CSB
+toysram_scan_tb.power1
+toysram_scan_tb.power2
+toysram_scan_tb.power3
+toysram_scan_tb.power4
+toysram_scan_tb.flash_clk
+toysram_scan_tb.flash_csb
+toysram_scan_tb.flash_io0
+@29
+toysram_scan_tb.flash_io1
 @22
 toysram_scan_tb.mprj_io[37:0]
 @200
@@ -30,13 +40,16 @@ toysram_scan_tb.mprj_io[37:0]
 @22
 toysram_scan_tb.uut.soc.core.VexRiscv.IBusCachedPlugin_fetchPc_pcReg[31:0]
 @28
+toysram_scan_tb.uut.soc.core.VexRiscv.writeBack_arbitration_isFiring
+@22
+toysram_scan_tb.uut.soc.core.VexRiscv.writeBack_PC[31:0]
+@28
 toysram_scan_tb.uut.soc.core.VexRiscv.dBusWishbone_CYC
 toysram_scan_tb.uut.soc.core.VexRiscv.dBusWishbone_STB
 @2
 toysram_scan_tb.uut.soc.core.VexRiscv.dBusWishbone_ADR[29:0]
-@29
-toysram_scan_tb.uut.soc.core.VexRiscv.dBusWishbone_ACK
 @28
+toysram_scan_tb.uut.soc.core.VexRiscv.dBusWishbone_ACK
 toysram_scan_tb.uut.soc.core.VexRiscv.iBusWishbone_CYC
 toysram_scan_tb.uut.soc.core.VexRiscv.iBusWishbone_STB
 @2
