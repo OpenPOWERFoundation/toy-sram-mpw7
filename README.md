@@ -15,19 +15,15 @@ This project is a test site for a custom 10T array cell design.  It is built as 
 
 * should build and sim; z on outs an x on ins
 * looks like VexRisc is stuck waiting for ack for ifetch=100002C0; jump to main
+
 ```
 100002c0 <main>:
 ```
+* appears some gpio's are used by flash??? don't see any comments anywhere.  core now running...
 
 ```
 make verify-toysram_scan-rtl
 
-docker pull efabless/dv:latest
-latest: Pulling from efabless/dv
-Digest: sha256:06497b070c8578fbbe87170c9f4dfa61c2c9a9d9f665a637c4d822ea98a7f1b7
-Status: Image is up to date for efabless/dv:latest
-docker.io/efabless/dv:latest
-docker run -v /data/projects/toy-sram-mpw7:/data/projects/toy-sram-mpw7 -v /home/wtf/projects/toy-sram-mpw7/dependencies/pdks:/home/wtf/projects/toy-sram-mpw7/dependencies/pdks -v /data/projects/toy-sram-mpw7/caravel:/data/projects/toy-sram-mpw7/caravel -e TARGET_PATH=/data/projects/toy-sram-mpw7 -e PDK_ROOT=/home/wtf/projects/toy-sram-mpw7/dependencies/pdks -e CARAVEL_ROOT=/data/projects/toy-sram-mpw7/caravel -e TOOLS=/foss/tools/riscv-gnu-toolchain-rv32i/217e7f3debe424d61374d31e33a091a630535937 -e DESIGNS=/data/projects/toy-sram-mpw7 -e PDK=sky130A -e CORE_VERILOG_PATH=/data/projects/toy-sram-mpw7/mgmt_core_wrapper/verilog -e MCW_ROOT=/data/projects/toy-sram-mpw7/mgmt_core_wrapper -u $(id -u $USER):$(id -g $USER) efabless/dv:latest sh -c "source ~/.bashrc && cd /data/projects/toy-sram-mpw7/verilog/dv/toysram_scan && export SIM=RTL && make"
 iverilog -Ttyp -DFUNCTIONAL -DSIM -DUSE_POWER_PINS -DUNIT_DELAY=#1 \
       -f/data/projects/toy-sram-mpw7/mgmt_core_wrapper/verilog/includes/includes.rtl.caravel \
       -f/data/projects/toy-sram-mpw7/verilog/includes/includes.rtl.caravel_user_project \
@@ -42,14 +38,13 @@ toysram_scan.hex loaded into memory
 Memory 5 bytes = 0x6f 0x00 0x00 0x0b 0x13
 FST info: dumpfile toysram_scan.vcd opened for output.
 MPRJ-IO state = zzzzzzzzz
-MPRJ-IO state = zzzzzxzzz
 
 Monitor: Timeout, Test Mega-Project IO Ports (RTL) Failed
 
 toysram_scan_tb.v:81: $finish called at 624987500 (1ps)
 mv toysram_scan.vcd RTL-toysram_scan.vcd
-rm toysram_scan.vvp
-
+/foss/tools/riscv-gnu-toolchain-rv32i/217e7f3debe424d61374d31e33a091a630535937/bin/riscv32-unknown-linux-gnu-objdump -d -S toysram_scan.elf > toysram_scan.lst
+rm toysram_scan.elf toysram_scan.vvp
 ```
 
 Refer to [README](docs/source/index.rst) for this sample project documentation.
