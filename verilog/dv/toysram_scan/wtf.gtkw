@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Wed Sep  7 12:10:25 2022
+[*] Wed Sep  7 12:33:41 2022
 [*]
 [dumpfile] "/data/projects/toy-sram-mpw7/verilog/dv/toysram_scan/RTL-toysram_scan.vcd"
-[dumpfile_mtime] "Tue Sep  6 22:03:21 2022"
-[dumpfile_size] 467930
+[dumpfile_mtime] "Wed Sep  7 12:24:53 2022"
+[dumpfile_size] 470401
 [savefile] "/data/projects/toy-sram-mpw7/verilog/dv/toysram_scan/wtf.gtkw"
-[timestart] 332058300
+[timestart] 278470000
 [size] 1637 1093
 [pos] 674 167
-*-15.382318 332064400 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-23.382317 283412500 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] toysram_scan_tb.
 [treeopen] toysram_scan_tb.uut.
 [treeopen] toysram_scan_tb.uut.mprj.
@@ -31,7 +31,6 @@ toysram_scan_tb.power4
 toysram_scan_tb.flash_clk
 toysram_scan_tb.flash_csb
 toysram_scan_tb.flash_io0
-@29
 toysram_scan_tb.flash_io1
 @22
 toysram_scan_tb.mprj_io[37:0]
@@ -63,6 +62,8 @@ toysram_scan_tb.uut.mprj.mprj.clk
 toysram_scan_tb.uut.mprj.mprj.rst
 toysram_scan_tb.uut.mprj.wbs_cyc_i
 toysram_scan_tb.uut.mprj.wbs_stb_i
+@29
+toysram_scan_tb.uut.mprj.wbs_ack_o
 @22
 toysram_scan_tb.uut.mprj.wbs_adr_i[31:0]
 toysram_scan_tb.uut.mprj.wbs_dat_o[31:0]
