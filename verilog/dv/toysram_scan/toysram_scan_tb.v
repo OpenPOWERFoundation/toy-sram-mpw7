@@ -19,7 +19,8 @@
 
 `define CYC_HEARTBEAT 2000
 `define DEBUG 0
-`define SCANS 10
+`define SCANS 1
+`define CMDS 1
 `define SCAN_INIT 128'h0123456789ABCDEFFEDCBA9876543210
 
 // Test
@@ -199,19 +200,23 @@ module toysram_scan_tb;
       // wait for rv boot - any signal to check???
       wait(cyc == 32'd15000);
 
+
+      // scan_reg does not reset to 0's
 		$display("[%08d] Setting Test Enable.", cyc);
       pin_te <= 1'b1;
-      // scan in (scan_reg does not reset to 0's)
-      // scan_reg left shifts, loads [0]; so load 127->0 if want to see it same order
       scan_in_val <= `SCAN_INIT;
       i <= 0;
       #100;
+
+      // --------------------------------------------------------
+      // Scanning
 
   		repeat (`SCANS) begin
 
          $display("[%08d] Writing scan reg: %032X", cyc, scan_in_val);
          #100;
          $display("[%08d] Scanning in...", cyc);
+         // scan_reg left shifts, loads [0]; so load 127->0 if want to see it same order
          repeat (128) begin
             pin_scan_in <= scan_in_val[127-i];  // set bit
             #100 pin_scan_clk <= 1'b1;          // blip on
@@ -225,7 +230,7 @@ module toysram_scan_tb;
          // scan_do = scan_reg[127]
          $display("[%08d] Scanning out...", cyc);
          repeat (128) begin
-            scan_out_val <= {scan_in_val[127:1],pin_scan_out};  // shift in bit
+            scan_out_val <= {scan_out_val[126:0],pin_scan_out};  // shift in bit
             #100 pin_scan_clk <= 1'b1;          // blip on
             i <= i + 1;                         // next bit
             #100 pin_scan_clk <= 1'b0;          // turn off
@@ -244,6 +249,185 @@ module toysram_scan_tb;
             i <= 0;
             #100;
          end
+
+      end
+
+      // --------------------------------------------------------
+      // Array reads/writes
+
+      /* scan_reg fields:
+
+      assign io_ra0_r0_adr = scan_reg_q[127:123];
+      //assign io_ra0_r0_dat = scan_reg_q[122:91]; // loaded by io_ra0_clk
+      assign io_ra0_r1_adr = scan_reg_q[90:86];
+      //assign io_ra0_r1_dat = scan_reg_q[85:54];  // loaded by io_ra0_clk
+      assign io_ra0_w0_adr = scan_reg_q[53:49];
+      assign io_ra0_w0_dat = scan_reg_q[48:17];
+      */
+
+      // reset array
+		$display("[%08d] Resetting array.", cyc);
+      pin_ra0_rst <= 1'b1;
+      #500;
+      pin_ra0_rst <= 1'b0;
+      #500;
+
+		$display("[%08d] Array cmds: R0[0], R1[1], W0[0]=08675309", cyc);
+      scan_in_val <= {5'h00, 32'hFFFFFFFF, 5'h01, 32'hFFFFFFFF, 5'h00, 32'h08675309, 17'h1BABE};  // R0a, R0d, R1a, R1d, W0a, W0d, <UNUSED>
+      i <= 0;
+      #100;
+
+  		repeat (`CMDS) begin
+
+         $display("[%08d] Writing scan reg: %032X", cyc, scan_in_val);
+         $display("[%08d] R0[%02X]=%08X  R1[%02X]=%08X  W0[%02C]=%08X", cyc,
+                   scan_in_val[127:123], scan_in_val[122:91], scan_in_val[90:86], scan_in_val[85:54], scan_in_val[53:49], scan_in_val[48:17]);
+         #100;
+         $display("[%08d] Scanning in...", cyc);
+         // scan_reg left shifts, loads [0]; so load 127->0 if want to see it same order
+         repeat (128) begin
+            pin_scan_in <= scan_in_val[127-i];  // set bit
+            #100 pin_scan_clk <= 1'b1;          // blip on
+            i <= i + 1;                         // next bit
+            #100 pin_scan_clk <= 1'b0;          // turn off
+         end
+         $display("[%08d] Scan complete.", cyc);
+         $display("[%08d] R0_EN=1, R1_EN=1, W0_EN=1", cyc);
+         pin_ra0_r0_en <= 1'b1;
+         pin_ra0_r1_en <= 1'b1;
+         pin_ra0_w0_en <= 1'b1;
+         #100;
+
+         $display("[%08d] Clocking array (set up input regs)...", cyc);
+         pin_ra0_clk <= 1'b1;
+         #100;
+         pin_ra0_clk <= 1'b0;
+         #100;
+
+         /* don't wipe out read addr
+         // **** can scan in here next commands or junk; read_en don't affect scan capture
+         scan_in_val <= 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+         i <= 0;
+         #100;
+         $display("[%08d] Writing scan reg: %032X", cyc, scan_in_val);
+         $display("[%08d] R0[%02X]=%08X  R1[%02X]=%08X  W0[%02C]=%08X", cyc,
+                   scan_in_val[127:123], scan_in_val[122:91], scan_in_val[90:86], scan_in_val[85:54], scan_in_val[53:49], scan_in_val[48:17]);
+         #100;
+         $display("[%08d] Scanning in...", cyc);
+         // scan_reg left shifts, loads [0]; so load 127->0 if want to see it same order
+         repeat (128) begin
+            pin_scan_in <= scan_in_val[127-i];  // set bit
+            #100 pin_scan_clk <= 1'b1;          // blip on
+            i <= i + 1;                         // next bit
+            #100 pin_scan_clk <= 1'b0;          // turn off
+         end
+         */
+
+         $display("[%08d] Clocking array (clock array)...", cyc);
+         pin_ra0_clk <= 1'b1;
+         #100;
+         pin_ra0_clk <= 1'b0;
+         #100;
+
+         $display("[%08d] R0_EN=1, R1_EN=1, W0_EN=0", cyc);
+         pin_ra0_r0_en <= 1'b1;
+         pin_ra0_r1_en <= 1'b1;
+         pin_ra0_w0_en <= 1'b0;
+         #100;
+
+         scan_out_val <= 128'h0;
+         i <= 0;
+         #100;
+         $display("[%08d] Scanning out...", cyc);
+         repeat (128) begin
+            scan_out_val <= {scan_out_val[126:0], pin_scan_out};  // shift in bit
+            #100 pin_scan_clk <= 1'b1;          // blip on
+            i <= i + 1;                         // next bit
+            #100 pin_scan_clk <= 1'b0;          // turn off
+         end
+         $display("[%08d] Scan complete.", cyc);
+         $display("[%08d] Read scan reg: %032X", cyc, scan_out_val);
+         $display("[%08d] R0[%02X]=%08X  R1[%02X]=%08X W0[%02C]=%08X", cyc,
+                   scan_out_val[127:123], scan_out_val[122:91], scan_out_val[90:86], scan_out_val[85:54], scan_out_val[53:49], scan_out_val[48:17]);
+
+         // would only have to restore if continually clocking array
+         scan_in_val <= scan_out_val;
+         i <= 0;
+         #100;
+         $display("[%08d] Scanning in (restore)...", cyc);
+         repeat (128) begin
+            pin_scan_in <= scan_in_val[127-i];  // set bit
+            #100 pin_scan_clk <= 1'b1;          // blip on
+            i <= i + 1;                         // next bit
+            #100 pin_scan_clk <= 1'b0;          // turn off
+         end
+         $display("[%08d] Scan complete.", cyc);
+
+         $display("[%08d] Clocking array...", cyc);
+         pin_ra0_clk <= 1'b1;
+         #100;
+         pin_ra0_clk <= 1'b0;
+         #100;
+
+         scan_out_val <= 128'h0;
+         i <= 0;
+         #100;
+         $display("[%08d] Scanning out...", cyc);
+         repeat (128) begin
+            scan_out_val <= {scan_out_val[126:0],pin_scan_out};  // shift in bit
+            #100 pin_scan_clk <= 1'b1;          // blip on
+            i <= i + 1;                         // next bit
+            #100 pin_scan_clk <= 1'b0;          // turn off
+         end
+         $display("[%08d] Scan complete.", cyc);
+         $display("[%08d] Read scan reg: %032X", cyc, scan_out_val);
+         $display("[%08d] R0[%02X]=%08X  R1[%02X]=%08X W0[%02C]=%08X", cyc,
+                   scan_out_val[127:123], scan_out_val[122:91], scan_out_val[90:86], scan_out_val[85:54], scan_out_val[53:49], scan_out_val[48:17]);
+
+         scan_in_val <= scan_out_val;
+         i <= 0;
+         #100;
+         $display("[%08d] Scanning in (restore)...", cyc);
+         repeat (128) begin
+            pin_scan_in <= scan_in_val[127-i];  // set bit
+            #100 pin_scan_clk <= 1'b1;          // blip on
+            i <= i + 1;                         // next bit
+            #100 pin_scan_clk <= 1'b0;          // turn off
+         end
+         $display("[%08d] Scan complete.", cyc);
+
+         $display("[%08d] Clocking array...", cyc);
+         pin_ra0_clk <= 1'b1;
+         #100;
+         pin_ra0_clk <= 1'b0;
+         #100;
+
+         scan_out_val <= 128'h0;
+         i <= 0;
+         #100;
+         $display("[%08d] Scanning out...", cyc);
+         repeat (128) begin
+            scan_out_val <= {scan_out_val[126:0],pin_scan_out};  // shift in bit
+            #100 pin_scan_clk <= 1'b1;          // blip on
+            i <= i + 1;                         // next bit
+            #100 pin_scan_clk <= 1'b0;          // turn off
+         end
+         $display("[%08d] Scan complete.", cyc);
+         $display("[%08d] Read scan reg: %032X", cyc, scan_out_val);
+         $display("[%08d] R0[%02X]=%08X  R1[%02X]=%08X W0[%02C]=%08X", cyc,
+                   scan_out_val[127:123], scan_out_val[122:91], scan_out_val[90:86], scan_out_val[85:54], scan_out_val[53:49], scan_out_val[48:17]);
+
+         scan_in_val <= scan_out_val;
+         i <= 0;
+         #100;
+         $display("[%08d] Scanning in (restore)...", cyc);
+         repeat (128) begin
+            pin_scan_in <= scan_in_val[127-i];  // set bit
+            #100 pin_scan_clk <= 1'b1;          // blip on
+            i <= i + 1;                         // next bit
+            #100 pin_scan_clk <= 1'b0;          // turn off
+         end
+         $display("[%08d] Scan complete.", cyc);
 
       end
 

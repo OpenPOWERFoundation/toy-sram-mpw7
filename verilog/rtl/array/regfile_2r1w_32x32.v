@@ -116,26 +116,6 @@ module regfile_2r1w_32x32 #(
    wire   [0:4] rd1_adr;
    wire   [0:4] wr0_adr;
 
-   assign rd0_adr = {rd0_a0, rd0_a1, rd0_a2, rd0_a3, rd0_a4};
-   assign rd1_adr = {rd1_a0, rd1_a1, rd1_a2, rd1_a3, rd1_a4};
-   assign wr0_adr = {wr0_a0, wr0_a1, wr0_a2, wr0_a3, wr0_a4};
-
-generate case (RA_SELECT)
-
-   `RA_SIM: begin        // sim 32x32
-
-   // array cells
-   reg[0:31] mem[0:31];
-
-   //wtf:icarus $dumpvars cannot dump a vpiMemory
-   //generate
-      genvar i;
-      for (i = 0; i < 31; i=i+1) begin: ra
-         wire [0:31] q;
-         assign q = mem[i];
-      end
-   //endgenerate
-
    // decode inputs, rd0
    assign rd0_enable = rd0_c_a0 | rd0_c_na0;
    assign rd0_a0 = rd0_c_a0;
@@ -159,6 +139,26 @@ generate case (RA_SELECT)
    assign wr0_a2 = wr0_a1_a2 | wr0_na1_a2;
    // assign wr0_a3 = wr0_a3;
    // assign wr0_a4 = wr0_a4;
+
+   assign rd0_adr = {rd0_a0, rd0_a1, rd0_a2, rd0_a3, rd0_a4};
+   assign rd1_adr = {rd1_a0, rd1_a1, rd1_a2, rd1_a3, rd1_a4};
+   assign wr0_adr = {wr0_a0, wr0_a1, wr0_a2, wr0_a3, wr0_a4};
+
+generate case (RA_SELECT)
+
+   `RA_SIM: begin        // sim 32x32
+
+   // array cells
+   reg[0:31] mem[0:31];
+
+   //wtf:icarus $dumpvars cannot dump a vpiMemory
+   //generate
+      genvar i;
+      for (i = 0; i < 31; i=i+1) begin: ra
+         wire [0:31] q;
+         assign q = mem[i];
+      end
+   //endgenerate
 
    // read ports
    assign rd0_dat = (rd0_enable) ? mem[rd0_adr] : 31'bX;

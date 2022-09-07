@@ -210,6 +210,13 @@ address_clock_sdr_2r1w_32 #(
 regfile_2r1w_32x32 #(
    .RA_SELECT(RA_SELECT)
 ) array0(
+
+`ifdef USE_POWER_PINS
+   .vccd1(vccd1),	// User area 1 1.8V supply
+   .vssd1(vssd1),	// User area 1 digital ground
+`endif
+
+   .clk         (clk),
    // predecoded address
 
    // read 0

@@ -27,6 +27,15 @@ module DFFRF_2R1W #(
    reg    [data_w-1:0]  DA_q;
    reg    [data_w-1:0]  DB_q;
 
+   //wtf:icarus $dumpvars cannot dump a vpiMemory
+   generate
+       genvar j;
+       for (j = 0; j < 2**addr_w; j=j+1) begin: ra
+          wire [data_w-1:0] dat;
+          assign dat = mem[j];
+       end
+   endgenerate
+
    initial begin: init
       integer i;
       for (i = 0; i < 2**addr_w; i = i + 1)
