@@ -22,14 +22,14 @@
 `include "../toysram.vh"
 
 // configuration macro
-// Manages config registers and routes cmd val
+// Manages config registers and routes cmd valids to CFG, CTRL, RAx.
 
 module cfg #(
-   parameter CFG0_INIT = 'h00000000,
-   parameter ADDR_MASK = 'hFFFF0000,
-   parameter CFG_ADDR =  'h00000000,
-   parameter CTL_ADDR =  'h00010000,
-   parameter RA0_ADDR =  'h00100000
+   parameter CFG0_INIT = 32'h00000000,
+   parameter ADDR_MASK = 32'hFFFF0000,
+   parameter CFG_ADDR =  32'h00000000,
+   parameter CTL_ADDR =  32'h00010000,
+   parameter RA0_ADDR =  32'h00080000
 )(
 `ifdef USE_POWER_PINS
    inout vccd1,	// User area 1 1.8V supply
@@ -85,7 +85,6 @@ module cfg #(
    // Macro Routing
    assign cfg_cmd_val = wb_cmd_val & ((wb_cmd_adr & ADDR_MASK) == (CFG_ADDR & ADDR_MASK));
    assign cfg0_d = cfg_cmd_val & cmd_we ? cmd_dat : cfg0_q;
-
 
    assign ctl_cmd_val = wb_cmd_val & ((wb_cmd_adr & ADDR_MASK) == (CTL_ADDR & ADDR_MASK));
    assign ra0_cmd_val = wb_cmd_val & ((wb_cmd_adr & ADDR_MASK) == (RA0_ADDR & ADDR_MASK));

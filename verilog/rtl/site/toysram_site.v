@@ -44,15 +44,6 @@
 
 module toysram_site #(
     parameter BITS = 32
-/*
-      .CFG_ADDR('h00000000),
-      .CTL_ADDR('h00000100),
-      .RA0_ADDR('h00001000),
-      .ADDR_MASK
-   CFG_ADDR =  'h0000E000,      // offset within RAx_ADDR
-   BIST_ADDR = 'h0000F000       // offset within RAx_ADDR
-
-*/
 )(
 `ifdef USE_POWER_PINS
    inout          vccd1,	// User area 1 1.8V supply
@@ -157,7 +148,10 @@ module toysram_site #(
    // convert rd/wr commands to/from WB and route to:
    // 1. config space
    // 2. array space
-   wb_slave wb (
+   wb_slave #(
+      .BASE_ADDR(`SLAVE_ADDR),
+      .BASE_MASK(`SLAVE_MASK)
+   ) wb (
 
 `ifdef USE_POWER_PINS
       .vccd1(vccd1),
@@ -185,9 +179,11 @@ module toysram_site #(
 
    // register/config space
    cfg #(
-      .CFG_ADDR('h00000000),
-      .CTL_ADDR('h00010000),
-      .RA0_ADDR('h00100000)
+      .CFG0_INIT(`CFG0_INIT),
+      .ADDR_MASK(`ADDR_MASK),
+      .CFG_ADDR(`CFG_ADDR),
+      .CTL_ADDR(`CTL_ADDR),
+      .RA0_ADDR(`RA0_ADDR)
    ) cfg (
 
 `ifdef USE_POWER_PINS

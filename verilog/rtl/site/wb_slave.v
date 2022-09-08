@@ -23,10 +23,12 @@
 
 // Wishbone slave macro
 // Bridges internal read/write commands to/from Wishbone.
+// Only accepts requests matching BASE_ADDR, BASE_MASK; address passed
+//  on as command does not include upper 4 bits.
 
 module wb_slave #(
-   parameter base_addr = 'h30000000,
-   parameter base_mask = 'hF0000000
+   parameter BASE_ADDR = 'h30000000,
+   parameter BASE_MASK = 'hF0000000
 ) (
 `ifdef USE_POWER_PINS
    inout                vccd1,
@@ -69,6 +71,7 @@ module wb_slave #(
 
    wire                 stall;
    wire                 base_match;
+   wire                 ack;
 
    // FF
    always @(posedge clk) begin
@@ -94,14 +97,18 @@ module wb_slave #(
    // WB
 
    assign stall = 'b0;
-   assign base_match = (cmd_adr_d & base_mask) == base_addr;
+   assign base_match = wbs_cyc_i & ((wbs_adr_i & BASE_MASK) == BASE_ADDR);
 
-   assign cmd_val_d = base_match & wbs_cyc_i & wbs_stb_i & ~stall;
-   assign cmd_adr_d = wbs_adr_i[27:0];
+   //assign cmd_val_d = (base_match & wbs_stb_i & ~stall) |
+   //                   (cmd_val_q & ~ack);
+   // equiv for wb
+   assign cmd_val_d = base_match & wbs_stb_i & ~stall & ~ack;
+   assign cmd_adr_d = {4'b0, wbs_adr_i[27:0]};
    assign cmd_we_d = wbs_we_i;
    assign cmd_sel_d = wbs_sel_i;
    assign cmd_dat_d = wbs_dat_i;
-   assign wbs_ack_o = rd_ack_q | (cmd_val_q & cmd_we_q);  // block with reset?
+   assign ack = rd_ack_q | (cmd_val_q & cmd_we_q);  // block with reset?
+   assign wbs_ack_o = ack;
    assign wbs_dat_o = rd_dat_q;
 
    // Outputs

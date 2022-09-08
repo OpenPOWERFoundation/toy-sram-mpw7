@@ -150,7 +150,6 @@ module control #(
    //  ra_r1_enb
    //  ra_w0_enb
    //
-   //
    // Scannable RA0 Reg
    //  ra0_r0_adr
    //  ra0_r0_dat
@@ -159,13 +158,16 @@ module control #(
    //  ra0_w0_adr
    //  ra0_w0_dat
    //
-   //
    // Array Read/Write
    // 1. scan in adr/dat reg
    // 2. activate ra_clk and ra_xx_enb for port control (n cycles)
    // 3. scan out adr/dat reg
    //
-   //
+   // Scan Logic
+   // * have control bit(s) to load logic config, array config, bist, whatever from scan_reg
+   //    after it's loaded
+   // * there are 17 unused bits left in scan_reg also
+
    // * not enough I/O to do full-speed reads/writes through I/O; enough for addresses, and could have data gen/chk logic for data
 
    assign test_enable = io_in[`PIN_TE];
@@ -219,15 +221,16 @@ module control #(
 
    assign ra0_r0_enb = test_enable ? io_ra0_r0_enb : ra0_cmd_val & ~special & ~cmd_we & (rd_type[0] | ~rd_type[1]);
    assign ra0_r1_enb = test_enable ? io_ra0_r1_enb : ra0_cmd_val & ~special & ~cmd_we & (rd_type[0] | rd_type[1]);
-   assign ra0_r0_adr = test_enable ? io_ra0_r0_adr : cmd_adr[4:0];                                                // adr=row
-   assign ra0_r1_adr = test_enable ? io_ra0_r1_adr : rd_type == 'b01 ? cmd_adr[4:0] : cmd_adr[10:6];              // adr=row
-   assign ra0_w0_enb = test_enable ? io_ra0_w0_enb : ra0_cmd_val & cmd_we & cmd_sel[0];                           // sel=port
-   assign ra0_w0_adr = test_enable ? io_ra0_w0_adr : cmd_adr[4:0];                                                // adr=row
+   assign ra0_r0_adr = test_enable ? io_ra0_r0_adr : cmd_adr[6:2];                                                // adr=row
+   assign ra0_r1_adr = test_enable ? io_ra0_r1_adr : rd_type == 'b01 ? cmd_adr[6:2] : cmd_adr[14:10];             // adr=row
+   assign ra0_w0_enb = test_enable ? io_ra0_w0_enb : ra0_cmd_val & cmd_we & |cmd_sel;                             // sel=port
+   assign ra0_w0_adr = test_enable ? io_ra0_w0_adr : cmd_adr[6:2];                                                // adr=row
    assign ra0_w0_dat = test_enable ? io_ra0_w0_dat : cmd_dat;                                                     //
 
 
    // Command Sequencer
    // rd_data in 1+ cycs; all reads use same timing
+   // writes are ack'd by wb_slave immediately
 
    //tbl cmdseq
    //n seq_q                             seq_d
@@ -299,120 +302,120 @@ module control #(
    // Generated...
    //vtable cmdseq
 assign seq_d[4] =
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
   (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
 assign seq_d[3] =
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
   (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
 assign seq_d[2] =
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & ~rd_type[0]) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & rd_type[0]) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & ~rd_type[0]) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & rd_type[0]) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & ~rd_type[0]) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & rd_type[0]) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & ~rd_type[0]) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & rd_type[0]) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
   (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
 assign seq_d[1] =
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_bist) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_config) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & ~rd_type[0]) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & rd_type[0]) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_bist) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_config) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & ~rd_type[0]) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & rd_type[0]) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
   (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
 assign seq_d[0] =
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & ~adr_bist & ~adr_config) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_config) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & rd_type[0]) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & rd_type[0]) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~ctl_cmd_val & ~ra0_cmd_val) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & cmd_we) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & cmd_we) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & ~adr_bist & ~adr_config) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_config) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & rd_type[0]) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & rd_type[0]) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
   (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
 assign rd_start =
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & ~adr_bist & ~adr_config) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_bist) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_config) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & ~rd_type[0]) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & rd_type[0]) +
-  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & ~rd_type[0]) +
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & ~adr_bist & ~adr_config) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_bist) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ctl_cmd_val & ~cmd_we & adr_config) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & ~rd_type[0]) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & ~rd_type[1] & rd_type[0]) |
+  (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & ~rd_type[0]) |
   (seq_q[4] & seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ra0_cmd_val & ~cmd_we & rd_type[1] & rd_type[0]);
 assign rd_ack =
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
   (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
 assign rdata_sel[2] =
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
   (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
 assign rdata_sel[1] =
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
   (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
 assign rdata_sel[0] =
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) +
-  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) +
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & ~seq_q[2] & seq_q[1] & ~seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & ~rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & ~seq_q[1] & seq_q[0] & rd_data) |
+  (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & ~rd_data) |
   (~seq_q[4] & ~seq_q[3] & seq_q[2] & seq_q[1] & seq_q[0] & rd_data);
    //vtable cmdseq
 

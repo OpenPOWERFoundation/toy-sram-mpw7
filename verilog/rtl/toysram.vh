@@ -2,6 +2,20 @@
 
 `include "defines.v"
 
+// Address regions
+`define SLAVE_MASK 32'hF0000000
+`define SLAVE_ADDR 32'h30000000
+
+`define ADDR_MASK  32'hFFFF0000
+`define CFG_ADDR   32'h00000000
+`define CTL_ADDR   32'h00010000
+`define RA0_ADDR   32'h00080000
+
+// Config
+`define CFG0_INIT 32'h00000000
+
+// Gen
+
 `define RA_SIM 0
 `define RA_DFFRAM 1
 `define RA_TOYSRAM 2
