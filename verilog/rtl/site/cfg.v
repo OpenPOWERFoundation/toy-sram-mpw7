@@ -24,13 +24,7 @@
 // configuration macro
 // Manages config registers and routes cmd valids to CFG, CTRL, RAx.
 
-module cfg #(
-   parameter CFG0_INIT = 32'h00000000,
-   parameter ADDR_MASK = 32'hFFFF0000,
-   parameter CFG_ADDR =  32'h00000000,
-   parameter CTL_ADDR =  32'h00010000,
-   parameter RA0_ADDR =  32'h00080000
-)(
+module cfg (
 `ifdef USE_POWER_PINS
    inout vccd1,	// User area 1 1.8V supply
    inout vssd1,	// User area 1 digital ground
@@ -52,27 +46,21 @@ module cfg #(
    output [31:0]  cmd_dat,
 
    output         ctl_cmd_val,
-   output         cfg_cmd_val,
    output         ra0_cmd_val,
    input          ctl_rd_ack,
    input  [31:0]  ctl_rd_dat
 
 );
 
-   reg    [7:0]   seq_q;
-   wire   [7:0]   seq_d;
-
-   reg    [31:0]  cfg0_q;
-   wire   [31:0]  cfg0_d;
+   reg            ack_q;
+   wire           ack_d;
 
    // FF
    always @(posedge clk) begin
       if (rst) begin
-         seq_q <= 'hFF;
-         cfg0_q <= CFG0_INIT;
+         ack_q <= 1'b0;
       end else begin
-         seq_q <= seq_d;
-         cfg0_q <= cfg0_d;
+         ack_q <= ack_d;
       end
    end
 
@@ -83,11 +71,11 @@ module cfg #(
    assign cmd_dat = wb_cmd_dat;
 
    // Macro Routing
-   assign cfg_cmd_val = wb_cmd_val & ((wb_cmd_adr & ADDR_MASK) == (CFG_ADDR & ADDR_MASK));
-   assign cfg0_d = cfg_cmd_val & cmd_we ? cmd_dat : cfg0_q;
+   // account for ack pipeline back to wb
+   assign ack_d = ctl_rd_ack;
 
-   assign ctl_cmd_val = wb_cmd_val & ((wb_cmd_adr & ADDR_MASK) == (CTL_ADDR & ADDR_MASK));
-   assign ra0_cmd_val = wb_cmd_val & ((wb_cmd_adr & ADDR_MASK) == (RA0_ADDR & ADDR_MASK));
+   assign ctl_cmd_val = wb_cmd_val & ~ack_q & ((wb_cmd_adr & `UNIT_MASK) == `CTL_ADDR);
+   assign ra0_cmd_val = wb_cmd_val & ~ack_q & ((wb_cmd_adr & `UNIT_MASK) == `RA0_ADDR);
 
    assign wb_rd_ack = ctl_rd_ack;
    assign wb_rd_dat = ctl_rd_dat;

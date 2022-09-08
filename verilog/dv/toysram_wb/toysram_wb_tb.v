@@ -17,11 +17,13 @@
 
 `timescale 1 ns / 1 ps
 
-`define CYC_HEARTBEAT 2000
+`define TRUE 1'b1
+`define FALSE 1'b0
+
+`define CYC_MAX 1000000
+`define CYC_HEARTBEAT 5000
+
 `define DEBUG 0
-`define SCANS 1
-`define CMDS 1
-`define SCAN_INIT 128'h0123456789ABCDEFFEDCBA9876543210
 
 // Test
 `define PIN_TE 8
@@ -35,6 +37,11 @@
 `define PIN_RA0_R0_EN 14
 `define PIN_RA0_R1_EN 15
 `define PIN_RA0_W0_EN 16
+// MISC
+`define PIN_RUNMODE 31
+`define PIN_ERROR   30
+`define PIN_USER_0  29
+`define PIN_USER_1  28
 
 module toysram_wb_tb;
 
@@ -96,19 +103,11 @@ module toysram_wb_tb;
 		$dumpvars(0, toysram_wb_tb);
       $display("\n\n");
 
-		// Repeat cycles of 1000 clock edges as needed to complete testbench
-		repeat (25) begin
+		repeat (`CYC_MAX/`CYC_HEARTBEAT) begin
 			repeat (`CYC_HEARTBEAT) @(posedge clock) cyc = cyc + 1;
 			$display("[%08d] ...tick...", cyc);
 		end
-		$display("%c[1;31m",27);
-		`ifdef GL
-			$display ("*ERROR* Timeout, Test Mega-Project IO Ports (GL) Failed");
-		`else
-			$display ("*ERROR* Timeout, Test Mega-Project IO Ports (RTL) Failed");
-		`endif
-		$display("%c[0m",27);
-		ok <= 1'b0;
+
 	end
 
    // *********************************************************************************
@@ -151,15 +150,16 @@ module toysram_wb_tb;
 	always @(mprj_io) begin
       if (`DEBUG > 0) begin
 			#1 $display("[%08d] I/O Update", cyc);
-		   $display("   MPRJ-IO TE    %b ", mprj_io[`PIN_TE]);
-		   $display("   MPRJ-IO SCAN  %b ", {mprj_io[`PIN_SCAN_CLK], mprj_io[`PIN_SCAN_IN], mprj_io[`PIN_SCAN_OUT]});
-		   $display("   MPRJ-IO RA0   %b ", {mprj_io[`PIN_RA0_CLK], mprj_io[`PIN_RA0_RST], mprj_io[`PIN_RA0_R0_EN], mprj_io[`PIN_RA0_R1_EN], mprj_io[`PIN_RA0_W0_EN]});
+		   $display("   MPRJ-IO TE     %b ", mprj_io[`PIN_TE]);
+		   $display("   MPRJ-IO SCAN   %b ", {mprj_io[`PIN_SCAN_CLK], mprj_io[`PIN_SCAN_IN], mprj_io[`PIN_SCAN_OUT]});
+		   $display("   MPRJ-IO RA0    %b ", {mprj_io[`PIN_RA0_CLK], mprj_io[`PIN_RA0_RST], mprj_io[`PIN_RA0_R0_EN], mprj_io[`PIN_RA0_R1_EN], mprj_io[`PIN_RA0_W0_EN]});
+		   $display("   MPRJ-IO STATUS %b ", {mprj_io[`PIN_RUNMODE], mprj_io[`PIN_ERROR], mprj_io[`PIN_USER_0], mprj_io[`PIN_USER_1]});
       end
 	end
 
    initial begin
-      ok <= 1'b1;
-      done <= 1'b0;
+      ok <= `TRUE;
+      done <= `FALSE;
       wait(~ok | done);
       if (~ok) begin
    		$display("%c[1;31m",27);
@@ -182,8 +182,31 @@ module toysram_wb_tb;
 		#1 $display("[%08d] Test Enable is inactive.", cyc);
    end
 
+   always @(posedge mprj_io[`PIN_RUNMODE]) begin
+		#1 $display("[%08d] RunMode is active.", cyc);
+   end
+
+   always @(negedge mprj_io[`PIN_RUNMODE]) begin
+		#1 $display("[%08d] RunMode is inactive.", cyc);
+      done <= `TRUE;
+   end
+
+   always @(posedge mprj_io[`PIN_ERROR]) begin
+		#1 $display("[%08d] Error is active.", cyc);
+      ok <= `FALSE;
+   end
+
+   always @(negedge mprj_io[`PIN_ERROR]) begin
+		#1 $display("[%08d] Error is inactive.", cyc);
+   end
+
+	always @(mprj_io[`PIN_USER_0] or mprj_io[`PIN_USER_1]) begin
+		#1 $display("[%08d] User=%X", cyc, {mprj_io[`PIN_USER_1], mprj_io[`PIN_USER_0]});
+   end
+
    // *********************************************************************************
    // test
+   // everything is controlled by vrv code
 
    initial begin
 
@@ -198,8 +221,9 @@ module toysram_wb_tb;
       wait(RSTB == 1'b1);
 		#1 $display("[%08d] Reset is inactive.", cyc);
 
-      wait(cyc == 50000);
-      done <= 1'b1;
+      wait(cyc == `CYC_MAX);
+     	$display ("\n*ERROR* Timeout\n");
+		ok <= `FALSE;
 
    end
 

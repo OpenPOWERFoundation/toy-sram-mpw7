@@ -3,16 +3,21 @@
 `include "defines.v"
 
 // Address regions
-`define SLAVE_MASK 32'hF0000000
-`define SLAVE_ADDR 32'h30000000
-
-`define ADDR_MASK  32'hFFFF0000
-`define CFG_ADDR   32'h00000000
-`define CTL_ADDR   32'h00010000
-`define RA0_ADDR   32'h00080000
+// slave (shouldn't have to, wb switch won't give cyc)
+`define SLAVE_MASK  32'hF0000000
+`define SLAVE_ADDR  32'h30000000
+// top-level routing
+`define UNIT_MASK   32'hFFFF0000
+`define CTL_ADDR    32'h00000000
+`define RA0_ADDR    32'h00080000
+// offsets
+`define CFG_MASK    32'h0000FFF0
+`define BIST_OFFSET 32'h0000F000 // in RAx
+`define CFG_OFFSET  32'h0000E000 // in RAx
+`define CFG0_OFFSET 32'h00000000 // in CTL
 
 // Config
-`define CFG0_INIT 32'h00000000
+`define CFG0_INIT 32'h80000001
 
 // Gen
 
@@ -43,8 +48,14 @@
 `define PIN_RA0_R0_EN 14
 `define PIN_RA0_R1_EN 15
 `define PIN_RA0_W0_EN 16
-// OE!!!
-`define PINS_OEB ~{38'h0000000800}
+// Misc
+`define PIN_RUNMODE 31
+`define PIN_ERROR 30
+`define PIN_USER_0 29
+`define PIN_USER_1 28
+
+// OE matches above!!!
+`define PINS_OEB ~{38'h00_F000_0800}
 
 /*
 #define PIN_TE 8

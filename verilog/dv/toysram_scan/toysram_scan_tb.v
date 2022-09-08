@@ -17,7 +17,9 @@
 
 `timescale 1 ns / 1 ps
 
-`define CYC_HEARTBEAT 2000
+`define CYC_MAX 100000
+`define CYC_HEARTBEAT 2500
+
 `define DEBUG 0
 `define SCANS 1
 `define CMDS 1
@@ -54,6 +56,8 @@ module toysram_scan_tb;
    // driver connections
    integer i;
    reg ok, done;
+   reg [31:0] write_data;
+
    reg [31:0] cyc;
    reg pin_te, pin_scan_clk, pin_scan_in, pin_scan_out;
    reg pin_ra0_clk, pin_ra0_rst, pin_ra0_r0_en, pin_ra0_r1_en, pin_ra0_w0_en;
@@ -97,7 +101,7 @@ module toysram_scan_tb;
       $display("\n\n");
 
 		// Repeat cycles of 1000 clock edges as needed to complete testbench
-		repeat (25) begin
+		repeat (`CYC_MAX/`CYC_HEARTBEAT) begin
 			repeat (`CYC_HEARTBEAT) @(posedge clock) cyc = cyc + 1;
 			$display("[%08d] ...tick...", cyc);
 		end
@@ -272,8 +276,10 @@ module toysram_scan_tb;
       pin_ra0_rst <= 1'b0;
       #500;
 
-		$display("[%08d] Array cmds: R0[0], R1[1], W0[0]=08675309", cyc);
-      scan_in_val <= {5'h00, 32'hFFFFFFFF, 5'h01, 32'hFFFFFFFF, 5'h00, 32'h08675309, 17'h1BABE};  // R0a, R0d, R1a, R1d, W0a, W0d, <UNUSED>
+      write_data <= 32'h08675309;
+      #100;
+		$display("[%08d] Array cmds: R0[0], R1[1], W0[0]=%08X", cyc, write_data);
+      scan_in_val <= {5'h00, 32'hFFFFFFFF, 5'h01, 32'hFFFFFFFF, 5'h00, write_data, 17'h1BABE};  // R0a, R0d, R1a, R1d, W0a, W0d, <UNUSED>
       i <= 0;
       #100;
 
@@ -428,6 +434,15 @@ module toysram_scan_tb;
          $display("[%08d] Read scan reg: %032X", cyc, scan_out_val);
          $display("[%08d] R0[%02X]=%08X  R1[%02X]=%08X W0[%02C]=%08X", cyc,
                    scan_out_val[127:123], scan_out_val[122:91], scan_out_val[90:86], scan_out_val[85:54], scan_out_val[53:49], scan_out_val[48:17]);
+
+         if (write_data !== scan_out_val[122:91]) begin
+            $display("%c[1;31m",27);
+            $display("*ERROR* R0 does not match expected.");
+            $display("%c[0m",27);
+            ok <= 1'b0;
+         end else begin
+            $display("[%08d] R0 good.\n", cyc);
+         end
 
       end
 

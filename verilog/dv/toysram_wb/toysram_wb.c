@@ -23,9 +23,48 @@
 #include <defs.h>
 #include <stub.c>
 
+#define PIN_TE 8
+// Scan
+#define PIN_SCAN_CLK 9
+#define PIN_SCAN_IN 10
+#define PIN_SCAN_OUT 11
+// RA0
+#define PIN_RA0_CLK 12
+#define PIN_RA0_RST 13
+#define PIN_RA0_R0_EN 14
+#define PIN_RA0_R1_EN 15
+#define PIN_RA0_W0_EN 16
+// MISC
+#define PIN_RUNMODE 31
+#define PIN_ERROR   30
+#define PIN_USER_0  29
+#define PIN_USER_1  28
+
+// current mgmt core restricts slave offsets to < 0x00100000!!!
+#define SLAVE_ADDR 0x30000000
+
+#define CTL_ADDR 0x00000000
+#define CFG0_OFFSET 0x00000000   // 0:write 4:set 8:rst C:toggle
+
+#define RA0_ADDR 0x00080000
+#define BIST_OFFSET 0x0000F000
+#define CFG_OFFSET 0x0000E000
+
+#define WRITE 0
+#define SET 1
+#define RESET 2
+#define TOGGLE 3
+void writeCfg0(unsigned int v, unsigned int mode);
+
+void writeCfg0(unsigned int v, unsigned int mode) {
+   unsigned int addr = SLAVE_ADDR + CTL_ADDR + CFG0_OFFSET + mode*4;
+   (*(volatile uint32_t*)(addr)) = v;
+}
+
 void main() {
 
-   unsigned int i, addr, data;
+   unsigned int i, addr, data, rangeLo, rangeHi;
+   bool ok = true;
 
 	/*
 	IO Control Registers
@@ -61,18 +100,6 @@ void main() {
    // *******************************************************************************
 	// Configure I/Os
 
-#define PIN_TE 8
-// Scan
-#define PIN_SCAN_CLK 9
-#define PIN_SCAN_IN 10
-#define PIN_SCAN_OUT 11
-// RA0
-#define PIN_RA0_CLK 12
-#define PIN_RA0_RST 13
-#define PIN_RA0_R0_EN 14
-#define PIN_RA0_R1_EN 15
-#define PIN_RA0_W0_EN 16
-
 	reg_mprj_io_8 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;     // test_enable
 	reg_mprj_io_9 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;     // scan_clk
 	reg_mprj_io_10 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // scan_di
@@ -82,41 +109,65 @@ void main() {
 	reg_mprj_io_14 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_r0_enb
 	reg_mprj_io_15 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_r1_enb
 	reg_mprj_io_16 = GPIO_MODE_USER_STD_INPUT_PULLDOWN;    // io_ra0_w0_enb
+	reg_mprj_io_28 = GPIO_MODE_USER_STD_OUTPUT;            // u0
+	reg_mprj_io_29 = GPIO_MODE_USER_STD_OUTPUT;            // u1
+	reg_mprj_io_30 = GPIO_MODE_USER_STD_OUTPUT;            // error
+	reg_mprj_io_31 = GPIO_MODE_USER_STD_OUTPUT;            // run
 
    // *******************************************************************************
 	reg_mprj_xfer = 1;
 	while (reg_mprj_xfer == 1);
 
    // *******************************************************************************
-   // do some array testing until it barfs
+   // try some array testing until it barfs
 
-   // how does vrv talk to io?  gpio? mprj_io?? need output enable??
-   // run light, error
+   reg_wb_enable = 1;                  // enable user->mgmt wb access
 
-   reg_wb_enable = -1;
-   // why aren't the addr space values constants????
-   // #define reg_mprj_slave (*(volatile uint32_t*)0x30000000)
-   /*
-   parameter CFG_ADDR =  'h00000000,
-   parameter CTL_ADDR =  'h00010000,
-   parameter RA0_ADDR =  'h00080000
-   */
-   addr = 0x30000000 + 0x00080000;
+   writeCfg0(0x80000001, WRITE);       // set run, rd wait=1
+
+   addr = SLAVE_ADDR + RA0_ADDR;
    data = 0x00000000;
 
-   // array addresses are 6:2 to avoid byte wonkiness
-   // write,read same
-   for (i = 0; i < 32; i++) {
+   // array addresses are 6:2 to avoid byte wonkiness for alignment/bus
+
+   rangeLo = 0;
+   rangeHi = 31;
+
+   writeCfg0(0x10000000, SET);         // set u=1
+
+   // write all
+   for (i = rangeLo; i <= rangeHi; i++) {
       (*(volatile uint32_t*)(addr + i*4)) = data + i + 1;
+   }
+
+   writeCfg0(0x30000000, TOGGLE);      // set u=2
+
+   // read all
+   for (i = rangeLo; i <= rangeHi; i++) {
       if (*(volatile uint32_t*)(addr + i*4) != data + i + 1) {
-         while(true) {}
+         ok = false;
+         break;
       }
    }
 
-   for (i = 0; i < 32; i++) {
-      if (*(volatile uint32_t*)(addr + i*4) != data + i + 1) {
-         while(true) {}
+   if (ok) {
+      writeCfg0(0x10000000, SET);      // set u=3
+      data = 0x00FFFFFF;
+
+      // write, read same
+      for (i = rangeLo; i <= rangeHi; i++) {
+         (*(volatile uint32_t*)(addr + i*4)) = (data + i + 1) << 24;
+         if (*(volatile uint32_t*)(addr + i*4) != ((data + i + 1) << 24)) {
+            ok = false;
+            break;
+         }
       }
+   }
+
+   if (ok) {
+      writeCfg0(0x80000000, RESET);    // you has opulence
+   } else {
+      writeCfg0(0x40000000, SET);      // you are worthless and weak!
    }
 
 }

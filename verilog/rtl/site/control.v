@@ -24,14 +24,7 @@
 // control macro
 // does stuff
 
-module control #(
-   parameter ADDR_MASK = 'h0000F000,
-   parameter CFG_ADDR =  'h0000E000,      // offset within RAx_ADDR
-   parameter BIST_ADDR = 'h0000F000,      // offset within RAx_ADDR
-   parameter CFG0_ADDR = 'h00000000,
-   parameter CFG0_INIT = 'h00000001
-)(
-
+module control (
 `ifdef USE_POWER_PINS
     inout vccd1,
     inout vssd1,
@@ -71,22 +64,25 @@ module control #(
 
 );
 
-   reg   [31:0]   cfg0_q;
-   wire  [31:0]   cfg0_d;
-   reg    [4:0]   seq_q;
-   wire   [4:0]   seq_d;
-   reg    [2:0]   rd_wait_q;
-   wire   [2:0]   rd_wait_d;
+   reg    [31:0]  cfg0_q;
+   wire   [31:0]  cfg0_d;
+   reg     [4:0]  seq_q;
+   wire    [4:0]  seq_d;
+   reg     [2:0]  rd_wait_q;
+   wire    [2:0]  rd_wait_d;
    reg   [127:0]  scan_reg_q;
    wire  [127:0]  scan_reg_d;
 
-   wire           ra0_bist_rd;
+   wire           adr_cfg0;
+   wire   [31:0]  cfg0_wrdata;
    wire           adr_bist;
    wire           adr_config;
    wire           special;
+   wire    [1:0]  wr_type;
+   wire           ra0_bist_rd;
    wire           rd_start;
-   wire   [1:0]   rd_type;
-   wire   [2:0]   rdata_sel;
+   wire    [1:0]  rd_type;
+   wire    [2:0]  rdata_sel;
    wire           rd_data;
 
    wire           test_enable;
@@ -99,16 +95,16 @@ module control #(
    wire           io_ra0_r0_enb;
    wire           io_ra0_r1_enb;
    wire           io_ra0_w0_enb;
-   wire   [4:0]   io_ra0_r0_adr;
-   wire   [4:0]   io_ra0_r1_adr;
-   wire   [4:0]   io_ra0_w0_adr;
-   wire   [31:0]  io_ra0_w0_dat;
+   wire    [4:0]  io_ra0_r0_adr;
+   wire    [4:0]  io_ra0_r1_adr;
+   wire    [4:0]  io_ra0_w0_adr;
+   wire    [31:0] io_ra0_w0_dat;
 
    // FF
    always @(posedge clk) begin
       if (rst) begin
          seq_q <= 'hFF;
-         cfg0_q <= CFG0_INIT;
+         cfg0_q <= `CFG0_INIT;
          rd_wait_q <= 0;
       end else begin
          seq_q <= seq_d;
@@ -168,8 +164,7 @@ module control #(
    //    after it's loaded
    // * there are 17 unused bits left in scan_reg also
 
-   // * not enough I/O to do full-speed reads/writes through I/O; enough for addresses, and could have data gen/chk logic for data
-
+   // ins
    assign test_enable = io_in[`PIN_TE];
    assign scan_clk = io_in[`PIN_SCAN_CLK];
    assign scan_di = io_in[`PIN_SCAN_IN];
@@ -180,8 +175,13 @@ module control #(
    assign io_ra0_r1_enb = io_in[`PIN_RA0_R1_EN];
    assign io_ra0_w0_enb = io_in[`PIN_RA0_W0_EN];
 
+   // outs
    assign io_out[`PIN_SCAN_OUT] = scan_do;
-   assign io_oeb = `PINS_OEB;
+   assign io_out[`PIN_RUNMODE] = cfg0_q[31];
+   assign io_out[`PIN_ERROR] = cfg0_q[30];
+   assign io_out[`PIN_USER_1] = cfg0_q[29];
+   assign io_out[`PIN_USER_0] = cfg0_q[28];
+   assign io_oeb = `PINS_OEB; //wtf do you need to do this anymore? or core does it???
 
    assign io_ra0_r0_adr = scan_reg_q[127:123];
    //assign io_ra0_r0_dat = scan_reg_q[122:91]; // loaded by io_ra0_clk
@@ -196,19 +196,29 @@ module control #(
    // Internal Routing
 
    // CFG0
-   // 31:03 Reserved
+   //    31 Run Mode
+   //    30 Error
+   // 29:28 User Outputs [1:0]
+   // 27:03 Reserved
    // 02:00 Read Data Wait Cycles (after cmd cycle)
-   assign cfg0_d = ctl_cmd_val & cmd_we & ((cmd_adr & ~ADDR_MASK) == CFG0_ADDR) ? cmd_dat : cfg0_q;
+
+   assign wr_type = cmd_adr[3:2];
+   assign adr_cfg0 = ctl_cmd_val & ((cmd_adr & `CFG_MASK) == `CFG0_OFFSET);
+   assign cfg0_wrdata = wr_type == 2'b00 ? cmd_dat :
+                        wr_type == 2'b01 ? cmd_dat | cfg0_q :
+                        wr_type == 2'b10 ? ~cmd_dat & cfg0_q :
+                                           cmd_dat ^ cfg0_q;
+   assign cfg0_d = cmd_we & adr_cfg0 ? cfg0_wrdata : cfg0_q;
 
    // Array Routing
 
-   assign adr_bist = (cmd_adr & ADDR_MASK) == (BIST_ADDR & ADDR_MASK);
-   assign adr_config = (cmd_adr & ADDR_MASK) == (CFG_ADDR & ADDR_MASK);
+   assign adr_bist = ra0_cmd_val & ((cmd_adr & `CFG_MASK) == `BIST_OFFSET);
+   assign adr_config = ra0_cmd_val & ((cmd_adr & `CFG_MASK) == `CFG_OFFSET);
    assign special = adr_bist | adr_config;
 
-   assign ra0_bist_ctl = ra0_cmd_val & cmd_we & adr_bist ? cmd_dat : 'h00000000;
-   assign ra0_bist_rd = ra0_cmd_val & ~cmd_we & adr_bist;
-   assign ra0_cfg_wr = ra0_cmd_val & cmd_we & adr_config;
+   assign ra0_bist_ctl = cmd_we & adr_bist ? cmd_dat : 'h00000000;
+   assign ra0_bist_rd = adr_bist & ~cmd_we;
+   assign ra0_cfg_wr = cmd_we & adr_config;
    assign ra0_cfg_wdat = cmd_dat;
 
    //  reads can use r0, r1, or both; if both, return either both hi or both lo data
@@ -226,7 +236,6 @@ module control #(
    assign ra0_w0_enb = test_enable ? io_ra0_w0_enb : ra0_cmd_val & cmd_we & |cmd_sel;                             // sel=port
    assign ra0_w0_adr = test_enable ? io_ra0_w0_adr : cmd_adr[6:2];                                                // adr=row
    assign ra0_w0_dat = test_enable ? io_ra0_w0_dat : cmd_dat;                                                     //
-
 
    // Command Sequencer
    // rd_data in 1+ cycs; all reads use same timing

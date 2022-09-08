@@ -99,7 +99,6 @@ module toysram_site #(
    wire   [3:0]   cmd_sel;
    wire   [31:0]  cmd_dat;
    wire           ctl_cmd_val;
-   wire           cfg_cmd_val;
    wire           ra0_cmd_val;
    wire           ctl_rd_ack;
    wire   [31:0]  ctl_rd_dat;
@@ -149,8 +148,6 @@ module toysram_site #(
    // 1. config space
    // 2. array space
    wb_slave #(
-      .BASE_ADDR(`SLAVE_ADDR),
-      .BASE_MASK(`SLAVE_MASK)
    ) wb (
 
 `ifdef USE_POWER_PINS
@@ -176,14 +173,7 @@ module toysram_site #(
       .rd_dat(wb_rd_dat)
    );
 
-
-   // register/config space
    cfg #(
-      .CFG0_INIT(`CFG0_INIT),
-      .ADDR_MASK(`ADDR_MASK),
-      .CFG_ADDR(`CFG_ADDR),
-      .CTL_ADDR(`CTL_ADDR),
-      .RA0_ADDR(`RA0_ADDR)
    ) cfg (
 
 `ifdef USE_POWER_PINS
@@ -204,7 +194,6 @@ module toysram_site #(
       .cmd_sel(cmd_sel),
       .cmd_dat(cmd_dat),
       .ctl_cmd_val(ctl_cmd_val),
-      .cfg_cmd_val(cfg_cmd_val),
       .ra0_cmd_val(ra0_cmd_val),
       .ctl_rd_ack(ctl_rd_ack),
       .ctl_rd_dat(ctl_rd_dat)
@@ -224,7 +213,7 @@ module toysram_site #(
    );
 */
 
-   // array interfaces
+   // array and i/o interfaces
    control #(
    ) ctl (
 `ifdef USE_POWER_PINS
