@@ -14,6 +14,11 @@ This project is a test site for a custom 10T array cell design.  It is built as 
 
 * https://docs.google.com/document/d/1Y7LuP_0dJ_vmD8G_Twc6qc97fj7aW5pRV5nAjN2oOUk/edit#heading=h.hdj6ymredbfl
 
+### To Do
+
+* add TE output from control; hold wb_slaave (at least) in reset when active
+* test reading cfg0; add some status bits to it (te, ?)
+
 ### Sim
 
 * test scan and array I/O and procedures
