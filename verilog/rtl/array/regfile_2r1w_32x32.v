@@ -195,18 +195,14 @@ generate case (RA_SELECT)
 
    end
 
-   `RA_TOYSRAM: begin      // toysram 32x32
+   `RA_TOYSRAM: begin      // toysram_32x32 replaces higher-level macro
 
-   /*
-      toysram_32x32_sdr #() mem (
-         .CLK(clk),
-         .EN0('b1),
-         .A0(rd_adr_0),
-         .Do0(rd_dat_0),
-         .WE0(wr_en_0),
-         .Di0(wr_dat_0)
-      );
-   */
+
+   end
+
+   `RA_TOYSRAM_BARE: begin    // toysram_ra_32x32
+
+
 
    end
 

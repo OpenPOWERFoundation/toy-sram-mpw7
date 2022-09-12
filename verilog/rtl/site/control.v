@@ -221,7 +221,11 @@ module control (
    assign ra0_cfg_wr = cmd_we & adr_config;
    assign ra0_cfg_wdat = cmd_dat;
 
-   //  reads can use r0, r1, or both; if both, return either both hi or both lo data
+   // reads can use r0, r1, or both; if both, return either both hi or both lo data
+   //wtf probs should be a way to do all r+w
+   //    need a data reg for reads or writes or both
+   //    1. write data reg, then do a rdtype + extra bit to indicate write
+   //    2. do write + wrtype (00:no read, 01:r0, 10:r1, 11:r01), latch rd port data
 
    assign rd_type = cmd_adr[15:14];  // port addr 14 bits
 
@@ -229,10 +233,12 @@ module control (
    assign ra0_clk = test_enable ? io_ra0_clk : clk;
    assign ra0_rst = test_enable ? io_ra0_rst : rst;
 
-   assign ra0_r0_enb = test_enable ? io_ra0_r0_enb : ra0_cmd_val & ~special & ~cmd_we & (rd_type[0] | ~rd_type[1]);
-   assign ra0_r1_enb = test_enable ? io_ra0_r1_enb : ra0_cmd_val & ~special & ~cmd_we & (rd_type[0] | rd_type[1]);
+   assign ra0_r0_enb = test_enable ? io_ra0_r0_enb : ra0_cmd_val & ~special & ~cmd_we & (rd_type[1] | ~rd_type[0]);
+   assign ra0_r1_enb = test_enable ? io_ra0_r1_enb : ra0_cmd_val & ~special & ~cmd_we & (rd_type[1] | rd_type[0]);
    assign ra0_r0_adr = test_enable ? io_ra0_r0_adr : cmd_adr[6:2];                                                // adr=row
-   assign ra0_r1_adr = test_enable ? io_ra0_r1_adr : rd_type == 'b01 ? cmd_adr[6:2] : cmd_adr[14:10];             // adr=row
+   // don't confuse programmers and change fields...
+   //assign ra0_r1_adr = test_enable ? io_ra0_r1_adr : rd_type == 'b01 ? cmd_adr[6:2] : cmd_adr[13:8];              // adr=row
+   assign ra0_r1_adr = test_enable ? io_ra0_r1_adr : cmd_adr[13:8];                                               // adr=row
    assign ra0_w0_enb = test_enable ? io_ra0_w0_enb : ra0_cmd_val & cmd_we & |cmd_sel;                             // sel=port
    assign ra0_w0_adr = test_enable ? io_ra0_w0_adr : cmd_adr[6:2];                                                // adr=row
    assign ra0_w0_dat = test_enable ? io_ra0_w0_dat : cmd_dat;                                                     //

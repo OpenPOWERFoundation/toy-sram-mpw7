@@ -21,14 +21,16 @@
 
 // Gen
 
+// comment out RA_SIM if want to generate different ports, etc. for physical
 `define RA_SIM 0
 `define RA_DFFRAM 1
 `define RA_TOYSRAM 2
+`define RA_TOYSRAM_BARE 3
 
-//`define RA_SELECT `RA_SIM
-`define RA_SELECT `RA_DFFRAM
-
-`define GENMODE 0      // 0=NoDelay, 1=Delay
+`define RA_SELECT `RA_SIM
+//`define RA_SELECT `RA_DFFRAM
+//`define RA_SELECT `RA_TOYSRAM
+`define GENMODE 0      // 0=NoDelay, 1=Delay (Physical)
 
 // RA LCB
 `define LCBSDR_CONFIGWIDTH 16

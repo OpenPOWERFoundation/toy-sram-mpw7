@@ -63,9 +63,11 @@ module toysram_site #(
    output [31:0]  wbs_dat_o,
 
    // Logic Analyzer Signals
+`ifdef RA_SIM
    input  [127:0] la_data_in,
    output [127:0] la_data_out,
    input  [127:0] la_oenb,
+`endif
 
    // IOs
    input  [`MPRJ_IO_PADS-1:0] io_in,
