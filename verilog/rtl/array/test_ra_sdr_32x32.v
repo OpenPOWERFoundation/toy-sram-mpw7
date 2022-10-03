@@ -107,26 +107,52 @@ module  test_ra_sdr_32x32 #(
 
     );
 
-    ra_2r1w_32x32_sdr #(
-        .RA_SELECT   (RA_SELECT)
-    ) ra (
+    if (RA_SELECT == `RA_TOYSRAM) begin
+
+//wtf fix so it doesnt mess up sim - need to add stupid wrapper since all cases are checked
+      \10T_32x32_magic_flattened ra (
 `ifdef USE_POWER_PINS
-      .vccd1(vccd1),
-      .vssd1(vssd1),
+         .VDD(vccd1),
+         .GND(vssd1),
 `endif
-        .clk         (clk),
-        .reset       (reset),
-        .strobe      (strobe),
-        .rd_enb_0    (mux_rd0_enb),
-        .rd_adr_0    (mux_rd0_adr),
-        .rd_dat_0    (rd_dat_0),
-        .rd_enb_1    (mux_rd1_enb),
-        .rd_adr_1    (mux_rd1_adr),
-        .rd_dat_1    (rd_dat_1),
-        .wr_enb_0    (mux_wr0_enb),
-        .wr_adr_0    (mux_wr0_adr),
-        .wr_dat_0    (mux_wr0_dat)
-    );
+// wtf bad port name not an error until lvs check
+         .clk(clk),
+         .rd_dat_0(rd_dat_0)
+         //.RBL0(rd_dat_0),
+         //.RBL0_0(rd_dat_0[0]),
+         //.RBL1(rd_dat_1),
+         //.RBL1_31(rd_dat_1[0]),
+         //.RWL(wr_dat_0),
+         //.RWL_0(wr_dat_0[0]),
+         //.WBL({rd_adr_0,rd_adr_1,wr_adr_0,wr_enb_0}),
+         //.WBL_0(rd_adr_0[0]),
+         //.WBLb(~{rd_adr_0,rd_adr_1,wr_adr_0,wr_enb_0})
+         //.WBLb_0(~rd_adr_0[0]),
+      );
+
+    end else begin
+
+      ra_2r1w_32x32_sdr #(
+        .RA_SELECT   (RA_SELECT)
+      ) ra (
+`ifdef USE_POWER_PINS
+         .vccd1(vccd1),
+         .vssd1(vssd1),
+`endif
+         .clk         (clk),
+         .reset       (reset),
+         .strobe      (strobe),
+         .rd_enb_0    (mux_rd0_enb),
+         .rd_adr_0    (mux_rd0_adr),
+         .rd_dat_0    (rd_dat_0),
+         .rd_enb_1    (mux_rd1_enb),
+         .rd_adr_1    (mux_rd1_adr),
+         .rd_dat_1    (rd_dat_1),
+         .wr_enb_0    (mux_wr0_enb),
+         .wr_adr_0    (mux_wr0_adr),
+         .wr_dat_0    (mux_wr0_dat)
+      );
+    end
 
 endmodule
 

@@ -46,8 +46,10 @@ set ::env(VERILOG_FILES) "\
 # Macros (array)
 #
 
-#wtf how to set this in shell?
-set ::env(RA_SELECT) 1
+#wtf how to set this in shell? actually should parse grep/cut it:
+# grep "\b`define RA_SELECT"
+#    also change RA_SELECT in toysram.vh
+set ::env(RA_SELECT) 2
 
 if {![info exists ::env(RA_SELECT)] || ($::env(RA_SELECT) == 0) } {
 
@@ -67,18 +69,6 @@ if {![info exists ::env(RA_SELECT)] || ($::env(RA_SELECT) == 0) } {
    #set ::env(EXTRA_LIBS) [glob $::env(DESIGN_DIR)/../../macros/DFFRAM/lib/*.lib]
 
    # instantiated macro names
-#[ERROR]: during executing openroad script /openlane/scripts/openroad/pdn.tcl
-#[ERROR]: Exit code: 1
-#[ERROR]: full log: ../data/projects/toy-sram-mpw7/openlane/toysram/runs/22_08_29_14_57/logs/floorplan/8-pdn.log
-#[ERROR]: Last 10 lines:
-#[INFO ODB-0226] Finished LEF file:  /data/projects/toy-sram-mpw7/openlane/toysram/runs/22_08_29_14_57/tmp/merged.unpadded.nom.lef
-#[INFO ODB-0127] Reading DEF file: /data/projects/toy-sram-mpw7/openlane/toysram/runs/22_08_29_14_57/results/floorplan/toysram_site.def
-#[INFO ODB-0128] Design: toysram_site
-#[INFO ODB-0130]     Created 607 pins.
-#[INFO ODB-0131]     Created 8629 components and 26876 component-terminals.
-#[INFO ODB-0133]     Created 2054 nets and 4739 connections.
-#[INFO ODB-0134] Finished DEF file: /data/projects/toy-sram-mpw7/openlane/toysram/runs/22_08_29_14_57/results/floorplan/toysram_site.def
-#[ERROR]: FP_PDN_MACRO_HOOKS missing power and ground pin names
    #set ::env(FP_PDN_MACRO_HOOKS) "\
 	#   ra_0.ra.array0.genblk1.mem vccd1 vssd1
    #   "
@@ -87,7 +77,43 @@ if {![info exists ::env(RA_SELECT)] || ($::env(RA_SELECT) == 0) } {
 
 }  elseif {$::env(RA_SELECT) == 2} {
 
-   puts "Generating toysram cell version..."
+   puts "Generating toysram array version..."
+
+   # empty modules (specifying I/O)
+   set ::env(VERILOG_FILES_BLACKBOX) "\
+	   $script_dir/../../verilog/rtl/toysram/wrapper/10T_32x32_magic_flattened.v \
+      "
+   # generated lef, gds, lib
+   set ::env(EXTRA_LEFS) [glob $::env(DESIGN_DIR)/../../macros/toysram/lef/*.lef]
+   set ::env(EXTRA_GDS_FILES) [glob $::env(DESIGN_DIR)/../../macros/toysram/gds/*.gds]
+   #set ::env(EXTRA_LIBS) [glob $::env(DESIGN_DIR)/../../macros/toysram/lib/*.lib]
+
+   # instantiated macro names
+   #set ::env(FP_PDN_MACRO_HOOKS) "\
+	#  ra_0.genblk1.ra vccd1 vssd1 \
+   #   "
+   # placement coords for all macros
+   set ::env(MACRO_PLACEMENT_CFG) $script_dir/macro.cfg
+
+}  elseif {$::env(RA_SELECT) == 3} {
+
+   puts "Generating toysram bare array version..."
+
+   # empty modules (specifying I/O)
+   set ::env(VERILOG_FILES_BLACKBOX) "\
+	   $script_dir/../../verilog/rtl/toysram/wrapper/10T_32x32_magic.v \
+      "
+   # generated lef, gds, lib
+   set ::env(EXTRA_LEFS) [glob $::env(DESIGN_DIR)/../../macros/toysram/lef/*.lef]
+   set ::env(EXTRA_GDS_FILES) [glob $::env(DESIGN_DIR)/../../macros/toysram/gds/*.gds]
+   #set ::env(EXTRA_LIBS) [glob $::env(DESIGN_DIR)/../../macros/toysram/lib/*.lib]
+
+   # instantiated macro names
+   #set ::env(FP_PDN_MACRO_HOOKS) "\
+	#  ra_0.ra.array0.genblk1.mem vccd1 vssd1
+   #   "
+   # placement coords for all macros
+   #set ::env(MACRO_PLACEMENT_CFG) $script_dir/macro.cfg
 
 } else {
 

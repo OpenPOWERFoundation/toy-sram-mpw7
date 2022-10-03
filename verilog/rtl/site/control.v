@@ -224,8 +224,11 @@ module control (
    // reads can use r0, r1, or both; if both, return either both hi or both lo data
    //wtf probs should be a way to do all r+w
    //    need a data reg for reads or writes or both
-   //    1. write data reg, then do a rdtype + extra bit to indicate write
-   //    2. do write + wrtype (00:no read, 01:r0, 10:r1, 11:r01), latch rd port data
+   //    1. write data/addr reg, then do a rdtype + extra bit to indicate write from special
+   //    2. do write + wrtype (00:no read, 01:r0, 10:r1, 11:r01), latch rd port data; if do this, use them for all
+   //       reads, which then enables R0/R1 read to see all bits by reading the data regs; but this requires
+   //       r0,r1,w0 all on addr bus concurrently (type(2), r0(5), r1(5), w0(5) for 32 entries)
+   //       mpw7 supports slave space of 24 bits; some are the local address routing (2-3) but depends on number of arrays
 
    assign rd_type = cmd_adr[15:14];  // port addr 14 bits
 
