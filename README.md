@@ -1,3 +1,139 @@
+# toysram 16x12 subarray test
+
+* getting a warning for missing ports (WWL) during floorplanning - think this is real problem (no WWL in .lef)
+* getting a detailed routing error for bit line (no access point); not sure about that one - layer related?
+
+## Setup to build subarray as macro
+
+```
+setup_openlane # proc to set up PDK_ROOT, etc.
+```
+
+* copy custom files
+
+```
+cp ~/projects/toysram-osu/magic/New_16x12_flat/10T_16x12_2r1w_magic_flattened.lef macros
+```
+
+* ***edit .lef to add "c_" to module name references so it doesn't start with number (think i needed to, so verilog module name matches)***
+
+```
+cp ~/projects/toysram-osu/magic/New_16x12_flat/10T_16x12_2r1w_magic_flattened.gds macros
+```
+
+* add wrapper_16x12.v (top with vectors and custom instantiation) and wrapper_custom_16x12.v (empty module matching custom i/o names) to verilog/rtl/wrapper/
+
+* set up openlane/toysram_16x12 files: config.tcl, macro.cfg, pin_order.cfg to use verilog and custom macro files
+
+```
+make toysram_16x12
+...
+[STEP 22]
+[INFO]: Running Detailed Routing...
+[ERROR]: during executing openroad script /openlane/scripts/openroad/droute.tcl
+[ERROR]: Exit code: 1
+[ERROR]: full log: ../data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/logs/routing/22-detailed.log
+[ERROR]: Last 10 lines:
+[WARNING DRT-6000] Macro pin has more than 1 polygon
+[WARNING DRT-6000] Macro pin has more than 1 polygon
+[WARNING DRT-6000] Macro pin has more than 1 polygon
+[WARNING DRT-6000] Macro pin has more than 1 polygon
+[WARNING DRT-6000] Macro pin has more than 1 polygon
+[WARNING DRT-6000] Macro pin has more than 1 polygon
+[WARNING DRT-6000] Macro pin has more than 1 polygon
+[ERROR DRT-0073] No access point for ra/RBL0_0.
+Error: droute.tcl, 46 DRT-0073
+child process exited abnormally
+```
+
+* ***warnings in floorplanning!***
+* openlane/toysram_16x12/runs/wtf/logs/floorplan/3-initial_fp.log
+* ```grep WWL macros/10T_16x12_2r1w_magic_flattened.lef``` finds nothing
+
+```
+OpenROAD 0b8b7ae255f8fbbbefa57d443949b84e73eed757
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+[INFO ODB-0222] Reading LEF file: /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/tmp/merged.unpadded.nom.lef
+[INFO ODB-0223]     Created 13 technology layers
+[INFO ODB-0224]     Created 25 technology vias
+[INFO ODB-0225]     Created 442 library cells
+[INFO ODB-0226] Finished LEF file:  /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/tmp/merged.unpadded.nom.lef
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_0 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_1 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_10 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_11 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_12 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_13 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_14 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_15 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_2 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_3 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_4 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_5 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_6 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_7 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_8 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port WWL_9 not found.
+```
+
+* openlane/toysram_16x12/runs/wtf/logs/routing/22-detailed.log
+
+```
+...
+[ERROR DRT-0073] No access point for ra/RBL0_0.
+Error: droute.tcl, 46 DRT-0073
+```
+
+* is this a real error?  or caused by renaming lef? or i have setup somthing wrong???
+
+```
+grep RBL0_0 macros/10T_16x12_2r1w_magic_flattened.lef
+  PIN RBL0_0
+  END RBL0_0
+```
+
+* in .lef:
+```
+  PIN RBL0_0
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    ANTENNADIFFAREA 0.722400 ;
+    PORT
+      LAYER li1 ;
+        RECT 2.650 20.405 2.725 20.615 ;
+        RECT 2.650 19.055 2.725 19.265 ;
+        RECT 2.650 17.705 2.725 17.915 ;
+        RECT 2.650 16.355 2.725 16.565 ;
+        RECT 2.650 15.005 2.725 15.215 ;
+        RECT 2.650 13.655 2.725 13.865 ;
+        RECT 2.650 12.305 2.725 12.515 ;
+        RECT 2.650 10.955 2.725 11.165 ;
+        RECT 2.650 9.605 2.725 9.815 ;
+        RECT 2.650 8.255 2.725 8.465 ;
+        RECT 2.650 6.905 2.725 7.115 ;
+        RECT 2.650 5.555 2.725 5.765 ;
+        RECT 2.650 4.205 2.725 4.415 ;
+        RECT 2.650 2.855 2.725 3.065 ;
+        RECT 2.650 1.505 2.725 1.715 ;
+        RECT 2.650 0.155 2.725 0.365 ;
+    END
+  END RBL0_0
+```
+
+* in a DFFRAM .lef; seems similar except for layer
+
+```
+  PIN Do0[0]
+    DIRECTION OUTPUT TRISTATE ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 6.070 98.640 6.350 100.640 ;
+    END
+  END Do0[0]
+```
+
 # Caravel User Project
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![UPRJ_CI](https://github.com/efabless/caravel_project_example/actions/workflows/user_project_ci.yml/badge.svg)](https://github.com/efabless/caravel_project_example/actions/workflows/user_project_ci.yml) [![Caravel Build](https://github.com/efabless/caravel_project_example/actions/workflows/caravel_build.yml/badge.svg)](https://github.com/efabless/caravel_project_example/actions/workflows/caravel_build.yml)

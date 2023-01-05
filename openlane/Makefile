@@ -15,7 +15,9 @@
 
 MAKEFLAGS+=--warn-undefined-variables
 
-export OPENLANE_RUN_TAG = $(shell date '+%y_%m_%d_%H_%M')
+#export OPENLANE_RUN_TAG = $(shell date '+%y_%m_%d_%H_%M')
+export OPENLANE_RUN_TAG = wtf
+
 OPENLANE_TAG ?= 2021.11.23_01.42.34
 OPENLANE_IMAGE_NAME ?= efabless/openlane:$(OPENLANE_TAG)
 designs = $(shell find * -maxdepth 0 -type d)
@@ -66,7 +68,7 @@ ifneq (,$(wildcard ./$(current_design)/interactive.tcl))
 		$(OPENLANE_IMAGE_NAME) sh -c $(openlane_cmd_interactive)
 else
 	# $(current_design)
-	mkdir -p ./$*/runs/$(OPENLANE_RUN_TAG) 
+	mkdir -p ./$*/runs/$(OPENLANE_RUN_TAG)
 	rm -rf ./$*/runs/$*
 	ln -s $$(realpath ./$*/runs/$(OPENLANE_RUN_TAG)) ./$*/runs/$*
 	$(docker_run) \
