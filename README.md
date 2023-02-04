@@ -1,9 +1,122 @@
 # toysram 16x12 subarray test
 
+## Current (WWL fix)
+
+* copy custom files
+
+```
+cp ~/projects/toysram-osu/magic/abstract/10T_16x12_2r1w_top.lef macros/10T_16x12_2r1w_magic_flattened.lef
+```
+
+* ***edit .lef to add "c_" to module name references so it doesn't start with number (think i needed to, so verilog module name matches)***
+
+```
+cp ~/projects/toysram-osu/magic/abstract/GDS/10T_16x12_2r1w_magic_flattened.gds macros
+```
+
+* run flow - diff error earlier in flow; may have to update setup files to change placement?
+
+```
+make toysram_16x12
+...
+[STEP 8]
+[INFO]: Running Global Placement...
+[STEP 9]
+[INFO]: Running Placement Resizer Design Optimizations...
+[ERROR]: during executing openroad script /openlane/scripts/openroad/resizer.tcl
+[ERROR]: Exit code: 1
+[ERROR]: full log: ../data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/logs/placement/9-resizer.log
+[ERROR]: Last 10 lines:
+[INFO DPL-0021] HPWL before           14519.2 u
+[INFO DPL-0022] HPWL after            14469.4 u
+[INFO DPL-0023] HPWL delta               -0.3 %
+[WARNING DPL-0005] Overlap check failed (1).
+ ra overlaps TAP_180
+[WARNING DPL-0006] Site aligned check failed (1).
+ ra
+[ERROR DPL-0033] detailed placement checks failed.
+DPL-0033
+child process exited abnormally
+```
+
+* ***warnings in floorplanning!***
+* openlane/toysram_16x12/runs/wtf/logs/floorplan/3-initial_fp.log
+
+```
+[INFO ODB-0222] Reading LEF file: /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/tmp/merged.unpadded.nom.lef
+[WARNING ODB-0186] macro c_10T_16x12_2r1w_magic_flattened references unknown site 12T
+[INFO ODB-0223]     Created 13 technology layers
+[INFO ODB-0224]     Created 25 technology vias
+[INFO ODB-0225]     Created 442 library cells
+[INFO ODB-0226] Finished LEF file:  /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/tmp/merged.unpadded.nom.lef
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_0 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_1 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_10 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_11 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_12 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_13 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_14 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_15 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_2 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_3 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_4 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_5 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_6 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_7 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_8 not found.
+[WARNING STA-0201] /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/results/synthesis/toysram_16x12.v line 13, instance ra port RWL0_9 not found.
+```
+
+* now RWL0 missing; RWL1 exists
+
+```
+grep RWL macros/*.lef
+  PIN RWL1_0
+  END RWL1_0
+  PIN RWL1_1
+  END RWL1_1
+  PIN RWL1_10
+  END RWL1_10
+  PIN RWL1_11
+  END RWL1_11
+  PIN RWL1_12
+  END RWL1_12
+  PIN RWL1_13
+  END RWL1_13
+  PIN RWL1_14
+  END RWL1_14
+  PIN RWL1_15
+  END RWL1_15
+  PIN RWL1_2
+  END RWL1_2
+  PIN RWL1_3
+  END RWL1_3
+  PIN RWL1_4
+  END RWL1_4
+  PIN RWL1_5
+  END RWL1_5
+  PIN RWL1_6
+  END RWL1_6
+  PIN RWL1_7
+  END RWL1_7
+  PIN RWL1_8
+  END RWL1_8
+  PIN RWL1_9
+  END RWL1_9
+```
+
+
+
+
+## Old
+
+* with 'new' .lef (after git pull) - getting syntax error - fixed; line 5266 should be PORT
+* seems to get same messages as original run below...
+
 * getting a warning for missing ports (WWL) during floorplanning - think this is real problem (no WWL in .lef)
 * getting a detailed routing error for bit line (no access point); not sure about that one - layer related?
 
-## Setup to build subarray as macro
+### Setup to build subarray as macro
 
 ```
 setup_openlane # proc to set up PDK_ROOT, etc.
