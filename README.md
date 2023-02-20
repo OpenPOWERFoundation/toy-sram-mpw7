@@ -1,6 +1,129 @@
 # toysram 16x12 subarray test
 
-## Current (WWL fix)
+## Current (RWL fix)
+
+* copy custom files
+
+```
+cp ~/projects/toysram-osu/magic/10T_16x12_2r1w_magic_flattened.lef macros
+```
+
+* ***edit .lef to add "c_" to module name references so it doesn't start with number (think i needed to, so verilog module name matches)***
+
+* NO NEW GDS; use old for now
+
+* run flow; no more warnings about i/o in openlane/toysram_16x12/runs/wtf/logs/floorplan/3-initial_fp.log
+
+```
+make toysram_16x12
+...
+[INFO]: Running Global Routing...
+[STEP 21]
+[INFO]: Writing Verilog...
+[STEP 22]
+[INFO]: Running Detailed Routing...
+[ERROR]: during executing openroad script /openlane/scripts/openroad/droute.tcl
+[ERROR]: Exit code: 1
+[ERROR]: full log: ../data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/logs/routing/22-detailed.log
+[ERROR]: Last 10 lines:
+[INFO DRT-0033] via2 shape region query size = 372.
+[INFO DRT-0033] met3 shape region query size = 329.
+[INFO DRT-0033] via3 shape region query size = 372.
+[INFO DRT-0033] met4 shape region query size = 99.
+[INFO DRT-0033] via4 shape region query size = 0.
+[INFO DRT-0033] met5 shape region query size = 0.
+[INFO DRT-0165] Start pin access.
+[ERROR DRT-0073] No access point for ra/WWL_0.
+Error: droute.tcl, 46 DRT-0073
+child process exited abnormally
+```
+
+* 22-detailed.log
+
+```
+OpenROAD 0b8b7ae255f8fbbbefa57d443949b84e73eed757
+This program is licensed under the BSD-3 license. See the LICENSE file for details.
+Components of this program may be licensed under more restrictive licenses which must be honored.
+[INFO ODB-0222] Reading LEF file: /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/tmp/merged.unpadded.nom.lef
+[INFO ODB-0223]     Created 13 technology layers
+[INFO ODB-0224]     Created 25 technology vias
+[INFO ODB-0225]     Created 442 library cells
+[INFO ODB-0226] Finished LEF file:  /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/tmp/merged.unpadded.nom.lef
+[INFO ODB-0127] Reading DEF file: /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/tmp/routing/20-global.def
+[INFO ODB-0128] Design: toysram_16x12
+[INFO ODB-0130]     Created 98 pins.
+[INFO ODB-0131]     Created 3383 components and 12886 component-terminals.
+[INFO ODB-0132]     Created 2 special nets and 12630 connections.
+[INFO ODB-0133]     Created 176 nets and 256 connections.
+[INFO ODB-0134] Finished DEF file: /data/projects/toy-sram-mpw7/openlane/toysram_16x12/runs/wtf/tmp/routing/20-global.def
+[INFO ORD-0030] Using 2 thread(s).
+[INFO DRT-0149] Reading tech and libs.
+
+Units:                1000
+Number of layers:     13
+Number of macros:     442
+Number of vias:       25
+Number of viarulegen: 25
+
+[INFO DRT-0150] Reading design.
+
+Design:                   toysram_16x12
+Die area:                 ( 0 0 ) ( 200000 200000 )
+Number of track patterns: 12
+Number of DEF vias:       3
+Number of components:     3383
+Number of terminals:      98
+Number of snets:          2
+Number of nets:           176
+
+[INFO DRT-0167] List of default vias:
+  Layer mcon
+    default via: L1M1_PR
+  Layer via
+    default via: M1M2_PR
+  Layer via2
+    default via: M2M3_PR
+  Layer via3
+    default via: M3M4_PR
+  Layer via4
+    default via: M4M5_PR
+[INFO DRT-0162] Library cell analysis.
+[INFO DRT-0163] Instance analysis.
+[INFO DRT-0164] Number of unique instances = 29.
+[INFO DRT-0168] Init region query.
+[INFO DRT-0024]   Complete FR_MASTERSLICE.
+[INFO DRT-0024]   Complete FR_VIA.
+[INFO DRT-0024]   Complete li1.
+[INFO DRT-0024]   Complete mcon.
+[INFO DRT-0024]   Complete met1.
+[INFO DRT-0024]   Complete via.
+[INFO DRT-0024]   Complete met2.
+[INFO DRT-0024]   Complete via2.
+[INFO DRT-0024]   Complete met3.
+[INFO DRT-0024]   Complete via3.
+[INFO DRT-0024]   Complete met4.
+[INFO DRT-0024]   Complete via4.
+[INFO DRT-0024]   Complete met5.
+[INFO DRT-0033] FR_MASTERSLICE shape region query size = 0.
+[INFO DRT-0033] FR_VIA shape region query size = 0.
+[INFO DRT-0033] li1 shape region query size = 22428.
+[INFO DRT-0033] mcon shape region query size = 50779.
+[INFO DRT-0033] met1 shape region query size = 7931.
+[INFO DRT-0033] via shape region query size = 465.
+[INFO DRT-0033] met2 shape region query size = 343.
+[INFO DRT-0033] via2 shape region query size = 372.
+[INFO DRT-0033] met3 shape region query size = 329.
+[INFO DRT-0033] via3 shape region query size = 372.
+[INFO DRT-0033] met4 shape region query size = 99.
+[INFO DRT-0033] via4 shape region query size = 0.
+[INFO DRT-0033] met5 shape region query size = 0.
+[INFO DRT-0165] Start pin access.
+[ERROR DRT-0073] No access point for ra/WWL_0.
+Error: droute.tcl, 46 DRT-0073
+
+```
+
+## Old (WWL fix)
 
 * copy custom files
 
